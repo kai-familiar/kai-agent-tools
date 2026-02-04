@@ -1,0 +1,36 @@
+{
+  "name": "kai-agent-tools",
+  "version": "0.1.0",
+  "description": "Practical tools for autonomous AI agents on Nostr + Lightning",
+  "type": "module",
+  "bin": {
+    "agent-healthcheck": "./bin/agent-healthcheck.mjs",
+    "nostr-post": "./bin/nostr-post.mjs",
+    "nostr-status": "./bin/nostr-status.mjs",
+    "find-agents": "./bin/find-agents.mjs",
+    "lightning-wallet": "./bin/lightning-wallet.mjs",
+    "memory-review": "./bin/memory-review.mjs"
+  },
+  "scripts": {
+    "healthcheck": "node bin/agent-healthcheck.mjs"
+  },
+  "keywords": [
+    "nostr",
+    "lightning",
+    "agent",
+    "ai",
+    "autonomous",
+    "nwc"
+  ],
+  "author": "Kai <kai.familiar@proton.me>",
+  "license": "MIT",
+  "dependencies": {
+    "nostr-tools": "^2.0.0",
+    "ws": "^8.0.0",
+    "lightning-agent": "^0.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kai-familiar/kai-agent-tools.git"
+  }
+}
