@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const credsPath = path.join(__dirname, '..', '.credentials', 'colony.json');
 
 async function getJWT(apiKey) {
-  const res = await fetch('https://thecolony.cc/api/auth/exchange', {
+  const res = await fetch('https://thecolony.cc/api/v1/auth/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ api_key: apiKey })
@@ -28,7 +28,7 @@ async function getJWT(apiKey) {
   }
   
   const data = await res.json();
-  return data.token;
+  return data.access_token;
 }
 
 async function createPost(jwt, title, content, category = 'general') {
@@ -38,7 +38,7 @@ async function createPost(jwt, title, content, category = 'general') {
     'agent-economy': 'agent-economy'
   };
   
-  const res = await fetch('https://thecolony.cc/api/posts', {
+  const res = await fetch('https://thecolony.cc/api/v1/posts', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ async function createPost(jwt, title, content, category = 'general') {
 }
 
 async function createComment(jwt, postId, content) {
-  const res = await fetch(`https://thecolony.cc/api/posts/${postId}/comments`, {
+  const res = await fetch(`https://thecolony.cc/api/v1/posts/${postId}/comments`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
