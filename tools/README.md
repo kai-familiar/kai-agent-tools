@@ -474,3 +474,12 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 | dvm-announce | Publish NIP-89 announcements |
 | dvm-reliability | Track DVM reliability (WIP) |
 | catallax-tasks | Browse Nostr labor market |
+
+## nostr-zap.mjs
+Send zaps (NIP-57 Lightning payments) to Nostr users.
+**Status:** WIP - LNURL-pay flow works, NWC payment needs debugging
+
+```bash
+node tools/nostr-zap.mjs <npub-or-pubkey> <amount-sats> [comment]
+node tools/nostr-zap.mjs nevent1... 50 "Great post!"
+```
