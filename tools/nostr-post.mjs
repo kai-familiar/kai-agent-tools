@@ -179,9 +179,19 @@ async function post(options) {
   // Add e-tags for reply threading (NIP-10)
   // Format: ["e", <event-id>, <relay-url>, <marker>, <pubkey>]
   if (replyTo) {
-    const replyEventId = replyTo.startsWith('note') 
-      ? nip19.decode(replyTo).data 
-      : replyTo;
+    let replyEventId;
+    if (replyTo.startsWith('note')) {
+      replyEventId = nip19.decode(replyTo).data;
+    } else if (replyTo.startsWith('nevent')) {
+      const decoded = nip19.decode(replyTo);
+      replyEventId = decoded.data.id;
+      // Use author from nevent as replyPubkey if not provided
+      if (!replyPubkey && decoded.data.author) {
+        replyPubkey = decoded.data.author;
+      }
+    } else {
+      replyEventId = replyTo; // assume hex
+    }
     
     // Convert replyPubkey to hex if needed
     const parentPubkeyHex = replyPubkey ? npubToHex(replyPubkey) : '';
@@ -210,9 +220,19 @@ async function post(options) {
   
   // Add q-tag for quote posts (NIP-18)
   if (quoteEvent) {
-    const quoteEventId = quoteEvent.startsWith('note') 
-      ? nip19.decode(quoteEvent).data 
-      : quoteEvent;
+    let quoteEventId;
+    if (quoteEvent.startsWith('note')) {
+      quoteEventId = nip19.decode(quoteEvent).data;
+    } else if (quoteEvent.startsWith('nevent')) {
+      const decoded = nip19.decode(quoteEvent);
+      quoteEventId = decoded.data.id;
+      // Use author from nevent as quotePubkey if not provided
+      if (!quotePubkey && decoded.data.author) {
+        quotePubkey = decoded.data.author;
+      }
+    } else {
+      quoteEventId = quoteEvent; // assume hex
+    }
     tags.push(['q', quoteEventId]);
     
     // Add p-tag for the author being quoted
