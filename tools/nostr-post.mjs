@@ -145,11 +145,11 @@ async function post(options) {
     }
   }
   
-  // Add p-tags for mentions
+  // Add p-tags for mentions (standard NIP-01 format)
   for (const npub of allMentions) {
     const hex = npubToHex(npub);
     if (hex) {
-      tags.push(['p', hex, '', 'mention']);
+      tags.push(['p', hex]);  // Simple format - just pubkey
     }
   }
   
