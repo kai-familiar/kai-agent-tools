@@ -123,7 +123,7 @@ async function resolveNip05(name, domain) {
 }
 
 async function post(options) {
-  const { content, mentions, replyTo, replyPubkey, rootEvent, aiLabel } = options;
+  let { content, mentions, replyTo, replyPubkey, rootEvent, aiLabel } = options;
   
   const tags = [];
   
@@ -132,11 +132,18 @@ async function post(options) {
   const allMentions = [...new Set([...mentions, ...textNpubs])];
   
   // Auto-extract and resolve NIP-05 identifiers (@name@domain.com)
+  // Also replace them with nostr:npub... in content (NIP-27)
   const nip05Mentions = extractNip05FromText(content);
   for (const { name, domain, full } of nip05Mentions) {
     const pubkey = await resolveNip05(name, domain);
     if (pubkey) {
-      console.log(`📍 Resolved ${full} → ${pubkey.slice(0, 8)}...`);
+      // Convert hex pubkey to npub for NIP-21 reference
+      const npub = nip19.npubEncode(pubkey);
+      console.log(`📍 Resolved ${full} → nostr:${npub.slice(0, 15)}...`);
+      
+      // Replace @name@domain with nostr:npub... in content (NIP-27)
+      content = content.replace(full, `nostr:${npub}`);
+      
       if (!allMentions.includes(pubkey)) {
         allMentions.push(pubkey);
       }
