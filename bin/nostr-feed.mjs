@@ -5,100 +5,102 @@
  * Usage:
  *   node nostr-feed.mjs                    # Feed from accounts I follow
  *   node nostr-feed.mjs <npub>             # Posts from specific account
- *   node nostr-feed.mjs --search "query"   # Search notes by content
+ *   node nostr-feed.mjs --limit 30         # More posts
  */
 
-import { Relay } from 'nostr-tools/relay';
+import { SimplePool } from 'nostr-tools/pool';
 import { nip19 } from 'nostr-tools';
 import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const RELAYS = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.nostr.band'];
-
-// Load my credentials to get my pubkey
-const creds = JSON.parse(readFileSync(new URL('../.credentials/nostr.json', import.meta.url)));
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const creds = JSON.parse(readFileSync(join(__dirname, '../.credentials/nostr.json')));
 const myPubkey = creds.publicKeyHex;
 
+const pool = new SimplePool();
+const RELAYS = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.nostr.band'];
+
 async function getFollowing(pubkey) {
-  // Get kind 3 (contact list) for a pubkey
-  for (const url of RELAYS) {
-    try {
-      const relay = await Relay.connect(url);
-      const events = await relay.fetch([{ kinds: [3], authors: [pubkey], limit: 1 }]);
-      relay.close();
-      if (events.length > 0) {
-        // Extract followed pubkeys from tags
-        return events[0].tags.filter(t => t[0] === 'p').map(t => t[1]);
-      }
-    } catch (e) {}
+  const events = await pool.querySync(RELAYS, { 
+    kinds: [3], 
+    authors: [pubkey], 
+    limit: 1 
+  });
+  if (events.length > 0) {
+    return events[0].tags.filter(t => t[0] === 'p').map(t => t[1]);
   }
   return [];
 }
 
 async function getFeed(pubkeys, limit = 20) {
-  const notes = [];
-  for (const url of RELAYS) {
-    try {
-      const relay = await Relay.connect(url);
-      const events = await relay.fetch([{ kinds: [1], authors: pubkeys, limit }]);
-      relay.close();
-      notes.push(...events);
-    } catch (e) {}
-  }
-  // Dedupe and sort by time
-  const seen = new Set();
-  return notes
-    .filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; })
-    .sort((a, b) => b.created_at - a.created_at)
-    .slice(0, limit);
+  const notes = await pool.querySync(RELAYS, { 
+    kinds: [1], 
+    authors: pubkeys, 
+    limit 
+  });
+  // Sort by time (newest first)
+  return notes.sort((a, b) => b.created_at - a.created_at).slice(0, limit);
 }
 
-async function getProfile(pubkey) {
-  for (const url of RELAYS) {
-    try {
-      const relay = await Relay.connect(url);
-      const events = await relay.fetch([{ kinds: [0], authors: [pubkey], limit: 1 }]);
-      relay.close();
-      if (events.length > 0) return JSON.parse(events[0].content);
-    } catch (e) {}
+async function getProfiles(pubkeys) {
+  const profiles = {};
+  const events = await pool.querySync(RELAYS, { 
+    kinds: [0], 
+    authors: pubkeys 
+  });
+  for (const e of events) {
+    if (!profiles[e.pubkey]) {
+      try { profiles[e.pubkey] = JSON.parse(e.content); } catch {}
+    }
   }
-  return null;
+  return profiles;
 }
 
 async function main() {
   const args = process.argv.slice(2);
+  let limit = 15;
+  
+  // Parse --limit flag
+  const limitIdx = args.indexOf('--limit');
+  if (limitIdx !== -1) {
+    limit = parseInt(args[limitIdx + 1]) || 15;
+    args.splice(limitIdx, 2);
+  }
   
   let pubkeys = [];
-  let label = '';
   
   if (args[0] && args[0].startsWith('npub')) {
-    // View specific account
     const { data } = nip19.decode(args[0]);
     pubkeys = [data];
-    const profile = await getProfile(data);
-    label = profile?.name || args[0].slice(0, 12) + '...';
-    console.log(`\n📜 Posts from ${label}\n`);
+    console.log(`\n📜 Posts from ${args[0].slice(0, 20)}...\n`);
   } else {
-    // View feed from following
     console.log('\n🌊 Fetching who I follow...');
     pubkeys = await getFollowing(myPubkey);
     if (pubkeys.length === 0) {
-      console.log('Not following anyone yet!');
+      console.log('❌ Not following anyone yet!');
+      console.log('Use a Nostr client to follow some accounts first.');
+      pool.close(RELAYS);
       return;
     }
-    console.log(`Following ${pubkeys.length} accounts. Fetching feed...\n`);
-    label = 'Following';
+    console.log(`✅ Following ${pubkeys.length} accounts. Fetching feed...\n`);
   }
   
-  const notes = await getFeed(pubkeys, 15);
+  const notes = await getFeed(pubkeys, limit);
   
   if (notes.length === 0) {
     console.log('No posts found.');
+    pool.close(RELAYS);
     return;
   }
   
+  // Batch fetch profiles for all authors
+  const authorPubkeys = [...new Set(notes.map(n => n.pubkey))];
+  const profiles = await getProfiles(authorPubkeys);
+  
   for (const note of notes) {
-    const profile = await getProfile(note.pubkey);
-    const name = profile?.name || note.pubkey.slice(0, 8) + '...';
+    const profile = profiles[note.pubkey];
+    const name = profile?.display_name || profile?.name || note.pubkey.slice(0, 8) + '...';
     const time = new Date(note.created_at * 1000).toLocaleString();
     const content = note.content.slice(0, 280) + (note.content.length > 280 ? '...' : '');
     
@@ -106,6 +108,11 @@ async function main() {
     console.log(`│ ${content.split('\n').join('\n│ ')}`);
     console.log(`└─ id: ${note.id.slice(0, 12)}...\n`);
   }
+  
+  pool.close(RELAYS);
 }
 
-main().catch(console.error);
+main().catch(e => {
+  console.error('Error:', e.message);
+  pool.close(RELAYS);
+});
