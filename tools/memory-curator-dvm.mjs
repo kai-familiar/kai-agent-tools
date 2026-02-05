@@ -399,11 +399,12 @@ class MemoryCuratorDVM {
       console.log(`✅ Connected: ${url}`);
       this.connections.set(url, ws);
       
-      // Subscribe to kind 5700 job requests
+      // Subscribe to kind 5700 job requests (no limit = continuous)
+      const since = Math.floor(Date.now() / 1000) - 3600; // Last hour + new
       const sub = JSON.stringify([
         'REQ',
         `dvm-${Date.now()}`,
-        { kinds: [DVM_KIND_REQUEST], limit: 10 }
+        { kinds: [DVM_KIND_REQUEST], since: since }
       ]);
       ws.send(sub);
     });
@@ -575,4 +576,14 @@ if (args.includes('--test')) {
     const status = dvm.status();
     console.log(`\n📊 Status: ${status.jobsReceived} received, ${status.jobsProcessed} processed, ${status.connectedRelays} relays`);
   }, 60000);
+  
+  // Keep-alive heartbeat
+  setInterval(() => {
+    // Just a heartbeat to keep event loop active
+  }, 5000);
+  
+  // Prevent process exit on unhandled rejection
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('⚠️ Unhandled rejection:', reason);
+  });
 }
