@@ -65,7 +65,7 @@ async function createComment(jwt, postId, content) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${jwt}`
     },
-    body: JSON.stringify({ content })
+    body: JSON.stringify({ body: content })
   });
   
   if (!res.ok) {
