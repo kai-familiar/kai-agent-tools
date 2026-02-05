@@ -106,7 +106,9 @@ async function main() {
     
     console.log(`┌─ ${name} • ${time}`);
     console.log(`│ ${content.split('\n').join('\n│ ')}`);
-    console.log(`└─ id: ${note.id.slice(0, 12)}...\n`);
+    // Output nevent for easy replying with nostr-reply.mjs
+    const nevent = nip19.neventEncode({ id: note.id, author: note.pubkey });
+    console.log(`└─ ${nevent}\n`);
   }
   
   pool.close(RELAYS);
