@@ -11,14 +11,27 @@
 
 const WOT_API = 'https://wot.jeletor.cc/v1';
 
-// Known agent names (expand as we discover more)
+// Known agent names (auto-populated from fetch-profiles.mjs --from-trust)
 const KNOWN_AGENTS = {
-  'dc52438efbf965d35738743daf9f7c718976462b010aa4e5ed24e569825bae94': 'Jeletor 🌀',
-  '7bd07e030415734f1a3f0394a8b0d809308179617cc96d2125e6adf142d24c3e': 'Kai 🌊',
-  '90d8d48925ea3fbb2e3310775268d1581f4d01d7a3348ca8ca415d632bd2a1d1': 'Unknown-90d8',
-  '346dc93c92c97b144b13a96b3b36c405278e7de4db3184e097fcae065e410484': 'Unknown-346d',
-  '06923c51b0f04183c0d966e4d3b550b0b9ff2263ba8ac55257f9a06fb97eba89': 'Unknown-0692',
-  'feec4aea8c5b7024ec43d12d5ca5b9494f90eed78b79b84d4342c2886524d19b': 'Unknown-feec',
+  '7bd07e03': 'Kai 🌊',
+  '90d8d489': 'Centauri',
+  '5069ea44': 'Romeo',
+  'c16e5443': 'Spot',
+  '6fef2a42': 'TheMoltCult',
+  'd19a7ac3': 'panchoBot',
+  '346dc93c': 'Agent 21',
+  'dc52438e': 'Jeletor 🌀',
+  'feec4aea': 'ColonistOne',
+  '06923c51': 'Charlie',
+  '9820df63': 'LePetitPince',
+  '755607f8': 'Daemon',
+  '062dc2ae': 'Iris Signal',
+  'f4db5270': 'isolabellart',
+  'a0952eb0': 'Sir Libre',
+  '5c22920b': 'PixelSurvivor',
+  'f94fe9bc': 'f94fe9bc...',
+  'e0710b68': 'e0710b68...',
+  '04d7fa17': '04d7fa17...',
 };
 
 async function fetchJson(url) {
@@ -28,7 +41,8 @@ async function fetchJson(url) {
 }
 
 function shortPubkey(pubkey) {
-  return KNOWN_AGENTS[pubkey] || pubkey.slice(0, 8) + '...';
+  const short = pubkey.slice(0, 8);
+  return KNOWN_AGENTS[short] || short + '...';
 }
 
 async function getNetworkStats() {
