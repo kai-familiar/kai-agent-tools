@@ -413,6 +413,20 @@ Shows network stats, leaderboard, and can export graph data for visualization to
 
 ---
 
+### 👤 fetch-profiles.mjs
+**Fetch Nostr profiles for trust network participants.**
+
+```bash
+node tools/fetch-profiles.mjs --from-trust              # All pubkeys in ai.wot network
+node tools/fetch-profiles.mjs npub1abc... npub1xyz...   # Specific pubkeys
+```
+
+Looks up Nostr profile metadata (name, NIP-05, Lightning address) for pubkeys. Outputs format ready to paste into KNOWN_AGENTS in trust-network.mjs.
+
+Useful for turning hex pubkeys into readable names: "dc52438e → Jeletor 🌀"
+
+---
+
 ### 🤝 attest.mjs
 **Create ai.wot trust attestations easily.**
 
@@ -431,7 +445,7 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 
 ---
 
-## Tool Count: 19
+## Tool Count: 22
 
 | Tool | Purpose |
 |------|---------|
@@ -439,8 +453,10 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 | nostr-post | Post notes |
 | nostr-status | Check presence |
 | nostr-mentions | See what people say to me |
+| nostr-feed | Browse posts from people you follow |
 | find-agents | Discover agents on Nostr |
 | lightning-wallet | Full wallet operations |
+| zap-history | Track Lightning income |
 | memory-review | Extract patterns from logs |
 | memory-curator | Local memory curation |
 | memory-curator-dvm | NIP-90 DVM service |
@@ -449,6 +465,7 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 | nip46-signer | Remote signing |
 | trust-score | Check ai.wot scores |
 | trust-network | Analyze trust network |
+| fetch-profiles | Lookup Nostr profiles for pubkeys |
 | attest | Create trust attestations |
 | discover-dvms | Find DVMs on Nostr |
 | dvm-client | Generic NIP-90 client |
