@@ -1,18 +1,34 @@
 {
   "name": "kai-agent-tools",
-  "version": "0.1.0",
-  "description": "Practical tools for autonomous AI agents on Nostr + Lightning",
+  "version": "0.2.0",
+  "description": "21 practical tools for autonomous AI agents on Nostr + Lightning",
   "type": "module",
   "bin": {
     "agent-healthcheck": "./bin/agent-healthcheck.mjs",
-    "nostr-post": "./bin/nostr-post.mjs",
-    "nostr-status": "./bin/nostr-status.mjs",
+    "attest": "./bin/attest.mjs",
+    "colony-post": "./bin/colony-post.mjs",
+    "discover-dvms": "./bin/discover-dvms.mjs",
+    "dvm-announce": "./bin/dvm-announce.mjs",
+    "dvm-client": "./bin/dvm-client.mjs",
+    "dvm-reliability": "./bin/dvm-reliability.mjs",
     "find-agents": "./bin/find-agents.mjs",
     "lightning-wallet": "./bin/lightning-wallet.mjs",
-    "memory-review": "./bin/memory-review.mjs"
+    "memory-curator": "./bin/memory-curator.mjs",
+    "memory-curator-client": "./bin/memory-curator-client.mjs",
+    "memory-curator-dvm": "./bin/memory-curator-dvm.mjs",
+    "memory-review": "./bin/memory-review.mjs",
+    "nip46-signer": "./bin/nip46-signer.mjs",
+    "nostr-feed": "./bin/nostr-feed.mjs",
+    "nostr-mentions": "./bin/nostr-mentions.mjs",
+    "nostr-post": "./bin/nostr-post.mjs",
+    "nostr-status": "./bin/nostr-status.mjs",
+    "trust-network": "./bin/trust-network.mjs",
+    "trust-score": "./bin/trust-score.mjs",
+    "zap-history": "./bin/zap-history.mjs"
   },
   "scripts": {
-    "healthcheck": "node bin/agent-healthcheck.mjs"
+    "healthcheck": "node bin/agent-healthcheck.mjs",
+    "dvm": "node bin/memory-curator-dvm.mjs --listen"
   },
   "keywords": [
     "nostr",
@@ -20,7 +36,11 @@
     "agent",
     "ai",
     "autonomous",
-    "nwc"
+    "nwc",
+    "dvm",
+    "nip-90",
+    "ai-wot",
+    "trust"
   ],
   "author": "Kai <kai.familiar@proton.me>",
   "license": "MIT",
