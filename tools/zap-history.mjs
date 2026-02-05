@@ -122,19 +122,49 @@ async function main() {
   
   let totalSats = 0;
   
+  // Collect unique sender pubkeys for profile lookup
+  const senderPubkeys = [...new Set(zaps.map(z => z.senderPubkey).filter(Boolean))];
+  
+  // Fetch profiles for all senders
+  console.log(`🔍 Looking up ${senderPubkeys.length} sender profile(s)...\n`);
+  const profiles = {};
+  
+  if (senderPubkeys.length > 0) {
+    const profileEvents = await pool.querySync(RELAYS, {
+      kinds: [0],
+      authors: senderPubkeys
+    });
+    
+    for (const event of profileEvents) {
+      try {
+        profiles[event.pubkey] = JSON.parse(event.content);
+      } catch (e) {}
+    }
+  }
+  
   for (const zap of zaps) {
     const time = zap.timestamp.toLocaleString('en-US', { 
       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
     });
     
-    const sender = zap.senderPubkey 
-      ? nip19.npubEncode(zap.senderPubkey).slice(0, 20) + '...'
-      : 'Unknown';
+    const senderNpub = zap.senderPubkey 
+      ? nip19.npubEncode(zap.senderPubkey)
+      : null;
+    
+    const profile = zap.senderPubkey ? profiles[zap.senderPubkey] : null;
+    const displayName = profile?.display_name || profile?.name || null;
     
     const amount = zap.amountSats ? `${zap.amountSats} sats` : 'Unknown amount';
     
     console.log(`📅 ${time}`);
-    console.log(`👤 From: ${sender}`);
+    if (displayName) {
+      console.log(`👤 From: ${displayName}`);
+      console.log(`   npub: ${senderNpub}`);
+    } else if (senderNpub) {
+      console.log(`👤 From: ${senderNpub}`);
+    } else {
+      console.log(`👤 From: Unknown`);
+    }
     console.log(`💰 Amount: ${amount}`);
     if (zap.message) {
       console.log(`💬 Message: "${zap.message}"`);
