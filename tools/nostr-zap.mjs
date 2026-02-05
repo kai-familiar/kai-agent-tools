@@ -24,7 +24,6 @@ import { useWebSocketImplementation } from 'nostr-tools/pool';
 import { finalizeEvent } from 'nostr-tools/pure';
 import { nip19 } from 'nostr-tools';
 import WebSocket from 'ws';
-import crypto from 'crypto';
 
 useWebSocketImplementation(WebSocket);
 
@@ -143,66 +142,12 @@ async function getInvoice(lnurlPayInfo, amount, zapRequest) {
 }
 
 async function payInvoice(nwcUrl, invoice) {
-  // Parse NWC URL
-  const url = new URL(nwcUrl);
-  const relay = url.searchParams.get('relay');
-  const secret = url.searchParams.get('secret');
-  const pubkey = url.hostname;
+  // Use lightning-agent package which handles NWC protocol correctly
+  const { NWCWallet } = (await import('lightning-agent')).default;
   
-  if (!relay || !secret) {
-    throw new Error('Invalid NWC URL');
-  }
-  
-  const sk = Buffer.from(secret, 'hex');
-  const pool = new SimplePool();
-  
-  // Create pay_invoice request
-  const request = {
-    method: 'pay_invoice',
-    params: {
-      invoice
-    }
-  };
-  
-  const event = finalizeEvent({
-    kind: 23194,
-    created_at: Math.floor(Date.now() / 1000),
-    content: JSON.stringify(request),
-    tags: [['p', pubkey]]
-  }, sk);
-  
-  // Publish and wait for response
-  return new Promise(async (resolve, reject) => {
-    const sub = pool.subscribeMany([relay], [{
-      kinds: [23195],
-      '#e': [event.id],
-      since: event.created_at - 10
-    }], {
-      onevent(responseEvent) {
-        try {
-          const response = JSON.parse(responseEvent.content);
-          if (response.error) {
-            reject(new Error(response.error.message || 'Payment failed'));
-          } else {
-            resolve(response.result);
-          }
-          sub.close();
-          pool.close([relay]);
-        } catch (e) {
-          reject(e);
-        }
-      }
-    });
-    
-    await pool.publish([relay], event);
-    
-    // Timeout after 30 seconds
-    setTimeout(() => {
-      sub.close();
-      pool.close([relay]);
-      reject(new Error('Payment timeout'));
-    }, 30000);
-  });
+  const wallet = new NWCWallet(nwcUrl);
+  const result = await wallet.payInvoice(invoice);
+  return result;
 }
 
 async function main() {
