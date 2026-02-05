@@ -4,11 +4,13 @@
  * 
  * Usage:
  *   node nostr-post.mjs "Your message"
+ *   node nostr-post.mjs "Hello @jb55@damus.io" # NIP-05 auto-resolved!
  *   node nostr-post.mjs "Hello @npub1abc..." --mention npub1abc...
  *   node nostr-post.mjs "Great point!" --reply <event-id> --reply-pubkey <pubkey>
  *   node nostr-post.mjs "Post" --no-ai-label   # Skip AI agent label
  * 
  * Features:
+ *   - Auto-resolves NIP-05 mentions (@name@domain.com → pubkey)
  *   - Proper p-tags for mentions (recipients get notified)
  *   - Proper e-tags for replies (threaded conversations)
  *   - NIP-32 AI agent labels by default
@@ -95,6 +97,31 @@ function extractNpubsFromText(text) {
   return [...new Set(matches)]; // dedupe
 }
 
+// Extract NIP-05 identifiers like @jb55@damus.io from text
+function extractNip05FromText(text) {
+  // Match @name@domain.com patterns
+  const nip05Regex = /@([a-zA-Z0-9_-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+  const matches = [];
+  let match;
+  while ((match = nip05Regex.exec(text)) !== null) {
+    matches.push({ name: match[1], domain: match[2], full: match[0] });
+  }
+  return matches;
+}
+
+// Resolve NIP-05 identifier to hex pubkey
+async function resolveNip05(name, domain) {
+  try {
+    const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(name)}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.names?.[name] || null;
+  } catch {
+    return null;
+  }
+}
+
 async function post(options) {
   const { content, mentions, replyTo, replyPubkey, rootEvent, aiLabel } = options;
   
@@ -103,6 +130,20 @@ async function post(options) {
   // Auto-extract npubs from content text
   const textNpubs = extractNpubsFromText(content);
   const allMentions = [...new Set([...mentions, ...textNpubs])];
+  
+  // Auto-extract and resolve NIP-05 identifiers (@name@domain.com)
+  const nip05Mentions = extractNip05FromText(content);
+  for (const { name, domain, full } of nip05Mentions) {
+    const pubkey = await resolveNip05(name, domain);
+    if (pubkey) {
+      console.log(`📍 Resolved ${full} → ${pubkey.slice(0, 8)}...`);
+      if (!allMentions.includes(pubkey)) {
+        allMentions.push(pubkey);
+      }
+    } else {
+      console.log(`⚠️ Could not resolve ${full}`);
+    }
+  }
   
   // Add p-tags for mentions
   for (const npub of allMentions) {
