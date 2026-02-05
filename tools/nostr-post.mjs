@@ -51,6 +51,8 @@ function parseArgs(args) {
     replyTo: null,     // event id to reply to
     replyPubkey: null, // pubkey of the author being replied to
     rootEvent: null,   // root event id (for threaded replies)
+    quoteEvent: null,  // event id to quote (q-tag, NIP-18)
+    quotePubkey: null, // pubkey of author being quoted
     aiLabel: true      // include NIP-32 AI label by default
   };
   
@@ -71,6 +73,12 @@ function parseArgs(args) {
       i += 2;
     } else if (arg === '--root' && args[i + 1]) {
       result.rootEvent = args[i + 1];
+      i += 2;
+    } else if (arg === '--quote' && args[i + 1]) {
+      result.quoteEvent = args[i + 1];
+      i += 2;
+    } else if (arg === '--quote-pubkey' && args[i + 1]) {
+      result.quotePubkey = args[i + 1];
       i += 2;
     } else if (arg === '--no-ai-label') {
       result.aiLabel = false;
@@ -131,7 +139,7 @@ async function resolveNip05(name, domain) {
 }
 
 async function post(options) {
-  let { content, mentions, replyTo, replyPubkey, rootEvent, aiLabel } = options;
+  let { content, mentions, replyTo, replyPubkey, rootEvent, quoteEvent, quotePubkey, aiLabel } = options;
   
   const tags = [];
   
@@ -200,6 +208,28 @@ async function post(options) {
     }
   }
   
+  // Add q-tag for quote posts (NIP-18)
+  if (quoteEvent) {
+    const quoteEventId = quoteEvent.startsWith('note') 
+      ? nip19.decode(quoteEvent).data 
+      : quoteEvent;
+    tags.push(['q', quoteEventId]);
+    
+    // Add p-tag for the author being quoted
+    if (quotePubkey) {
+      const pubkeyHex = npubToHex(quotePubkey);
+      if (pubkeyHex && !tags.some(t => t[0] === 'p' && t[1] === pubkeyHex)) {
+        tags.push(['p', pubkeyHex]);
+      }
+    }
+    
+    // Add nostr:nevent reference in content if not already present (NIP-21)
+    const neventRef = `nostr:${nip19.neventEncode({ id: quoteEventId })}`;
+    if (!content.includes('nostr:nevent')) {
+      content = content + '\n\n' + neventRef;
+    }
+  }
+  
   // Add NIP-32 AI agent label (so clients know this is from an AI)
   if (aiLabel) {
     tags.push(['l', 'ai', 'agent']);
@@ -261,18 +291,22 @@ Usage:
   node nostr-post.mjs "Your message"
   node nostr-post.mjs "Hello!" --mention npub1abc...
   node nostr-post.mjs "Great point!" --reply <event-id> --reply-pubkey <npub>
+  node nostr-post.mjs "Nice insight!" --quote <event-id> --quote-pubkey <npub>
   node nostr-post.mjs "Post" --no-ai-label
 
 Options:
-  --mention <npub>      Add p-tag to notify someone
-  --reply <event-id>    Reply to a specific note (adds e-tag)
-  --reply-pubkey <npub> Author of the note being replied to
-  --root <event-id>     Root event for threaded replies
-  --no-ai-label         Don't add NIP-32 AI agent label
+  --mention <npub>        Add p-tag to notify someone
+  --reply <event-id>      Reply to a specific note (adds e-tag, NIP-10)
+  --reply-pubkey <npub>   Author of the note being replied to
+  --root <event-id>       Root event for threaded replies
+  --quote <event-id>      Quote a note (adds q-tag, NIP-18)
+  --quote-pubkey <npub>   Author of the note being quoted
+  --no-ai-label           Don't add NIP-32 AI agent label
 
 Notes:
   - npubs in message text are auto-detected and tagged
   - AI agent labels (NIP-32) are added by default
+  - Quote posts auto-append nostr:nevent reference
   `);
   process.exit(0);
 }
