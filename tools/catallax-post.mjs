@@ -159,9 +159,10 @@ async function postTask(options) {
   console.log('\n📤 Publishing to relays...');
   
   const results = await Promise.allSettled(
-    RELAYS.map(relay => 
-      pool.publish([relay], signedEvent).then(() => relay)
-    )
+    RELAYS.map(async relay => {
+      await pool.publish([relay], signedEvent);
+      return relay;
+    })
   );
 
   const successful = results.filter(r => r.status === 'fulfilled');
