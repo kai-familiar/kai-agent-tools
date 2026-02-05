@@ -34,7 +34,15 @@ const creds = JSON.parse(readFileSync(join(workspaceDir, '.credentials/nostr.jso
 const sk = Uint8Array.from(Buffer.from(creds.privateKeyHex, 'hex'));
 
 // Default relays
-const RELAYS = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.nostr.band'];
+const RELAYS = [
+  'wss://relay.damus.io',
+  'wss://nos.lol',
+  'wss://relay.nostr.band',
+  'wss://relay.primal.net',
+  'wss://purplepag.es',
+  'wss://relay.snort.social',
+  'wss://nostr.wine'
+];
 
 function parseArgs(args) {
   const result = {
