@@ -161,21 +161,26 @@ async function post(options) {
   }
   
   // Add e-tags for reply threading (NIP-10)
+  // Format: ["e", <event-id>, <relay-url>, <marker>, <pubkey>]
   if (replyTo) {
     const replyEventId = replyTo.startsWith('note') 
       ? nip19.decode(replyTo).data 
       : replyTo;
     
+    // Convert replyPubkey to hex if needed
+    const parentPubkeyHex = replyPubkey ? npubToHex(replyPubkey) : '';
+    
     if (rootEvent) {
-      // This is a reply within a thread
+      // This is a reply within a thread - need both root and reply tags
       const rootEventId = rootEvent.startsWith('note')
         ? nip19.decode(rootEvent).data
         : rootEvent;
+      // TODO: rootPubkey should be passed separately for proper threading
       tags.push(['e', rootEventId, '', 'root']);
-      tags.push(['e', replyEventId, '', 'reply']);
+      tags.push(['e', replyEventId, '', 'reply', parentPubkeyHex]);
     } else {
-      // Direct reply to root (single e-tag with root marker)
-      tags.push(['e', replyEventId, '', 'root']);
+      // Direct reply to root (single e-tag with root marker + pubkey)
+      tags.push(['e', replyEventId, '', 'root', parentPubkeyHex]);
     }
     
     // Add p-tag for the author being replied to
