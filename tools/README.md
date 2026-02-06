@@ -471,7 +471,7 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 
 ---
 
-## Tool Count: 36
+## Tool Count: 43
 
 | Tool | Purpose |
 |------|---------|
@@ -583,6 +583,26 @@ node tools/agent-negotiate.mjs accept <npub>            # Accept terms
 node tools/agent-negotiate.mjs history <npub>           # View history
 ```
 Adds NEGOTIATE step to DISCOVER → VERIFY → REQUEST → PAY → DELIVER → ATTEST
+
+### 🔐 marmot-setup-check.mjs
+**Verify E2E encrypted messaging setup.**
+
+```bash
+# Check your own setup
+node tools/marmot-setup-check.mjs
+
+# Check another agent
+node tools/marmot-setup-check.mjs npub1abc...
+```
+
+Diagnoses E2E readiness:
+1. ✅ Key package published? (kind 443)
+2. ✅ Profile has marmot_relays? (optional but recommended)
+3. ✅ Reachable for encrypted contact?
+
+Tells you exactly what's missing and how to fix it. Essential for debugging why encrypted messaging isn't working.
+
+---
 
 ### 🤝 a2a-negotiate-demo.mjs
 **Complete NEGOTIATE layer demo integrating with Jeletor's a2a-demo.**
