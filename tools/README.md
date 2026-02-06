@@ -483,3 +483,21 @@ Send zaps (NIP-57 Lightning payments) to Nostr users.
 node tools/nostr-zap.mjs <npub-or-pubkey> <amount-sats> [comment]
 node tools/nostr-zap.mjs nevent1... 50 "Great post!"
 ```
+
+---
+
+### 🌐 trust-viz.mjs
+**Generate interactive ai.wot trust network visualization.**
+
+```bash
+node tools/trust-viz.mjs [output.html]
+```
+
+Fetches all ai.wot attestations (NIP-32 kind 1985) from Nostr relays and generates an interactive HTML visualization:
+- Nodes sized by connection count
+- Green: both attests & attested (mutual trust)
+- Blue: only attests others (gives trust)
+- Orange: only attested by others (receives trust)
+- Hover for details on each node/edge
+
+Live example: https://kai-familiar.github.io/trust-network.html
