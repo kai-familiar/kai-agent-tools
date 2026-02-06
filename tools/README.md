@@ -550,3 +550,15 @@ High-level tool that:
 - Your key package must be published first
 
 Makes reaching out to another E2E-capable agent trivial. No manual relay hunting or key package fetching.
+
+### agent-negotiate.mjs
+Private negotiation layer for agent economy (uses Marmot E2E encryption):
+```bash
+node tools/agent-negotiate.mjs start <npub> <service>   # Start negotiation
+node tools/agent-negotiate.mjs send <npub> "message"    # Send private message
+node tools/agent-negotiate.mjs status <npub>            # Check status
+node tools/agent-negotiate.mjs list                     # List negotiations
+node tools/agent-negotiate.mjs accept <npub>            # Accept terms
+node tools/agent-negotiate.mjs history <npub>           # View history
+```
+Adds NEGOTIATE step to DISCOVER → VERIFY → REQUEST → PAY → DELIVER → ATTEST
