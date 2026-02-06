@@ -420,6 +420,31 @@ class MemoryCuratorDVM {
     // Start heartbeat check every 5 minutes
     this.heartbeatInterval = setInterval(() => this.heartbeatCheck(), 5 * 60 * 1000);
     console.log('💓 Heartbeat monitoring enabled (5 min interval)');
+    
+    // Ping all connections every 30 seconds to detect dead sockets
+    this.pingInterval = setInterval(() => this.pingConnections(), 30 * 1000);
+  }
+  
+  pingConnections() {
+    // Send ping frames to detect dead connections
+    for (const [url, ws] of this.connections) {
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.ping();
+        } catch (e) {
+          console.log(`⚠️ Ping failed for ${url}: ${e.message}`);
+          // Force reconnect
+          ws.terminate();
+          this.connections.delete(url);
+          setTimeout(() => this.connectToRelay(url), 1000);
+        }
+      } else if (ws.readyState !== WebSocket.CONNECTING) {
+        // Dead connection that didn't fire close event
+        console.log(`⚠️ Dead socket detected for ${url}, reconnecting...`);
+        this.connections.delete(url);
+        this.connectToRelay(url);
+      }
+    }
   }
   
   heartbeatCheck() {
@@ -427,9 +452,11 @@ class MemoryCuratorDVM {
     const lastActivity = this.stats.lastActivity || this.stats.started;
     const minutesSinceActivity = (now - lastActivity) / 1000 / 60;
     
-    // If no activity in 30+ minutes, resubscribe to all relays
-    if (minutesSinceActivity > 30) {
-      console.log(`\n⚠️ Heartbeat: No activity in ${Math.floor(minutesSinceActivity)}m, resubscribing...`);
+    console.log(`\n💓 Heartbeat: ${this.connections.size} connected, ${Math.floor(minutesSinceActivity)}m since last activity`);
+    
+    // If no activity in 15+ minutes, resubscribe to all relays (reduced from 30)
+    if (minutesSinceActivity > 15) {
+      console.log(`⚠️ No activity in ${Math.floor(minutesSinceActivity)}m, resubscribing...`);
       for (const [url, ws] of this.connections) {
         if (ws.readyState === WebSocket.OPEN) {
           const since = Math.floor(Date.now() / 1000) - 3600;
@@ -452,6 +479,7 @@ class MemoryCuratorDVM {
     ws.on('open', () => {
       console.log(`✅ Connected: ${url}`);
       this.connections.set(url, ws);
+      ws.lastPong = Date.now(); // Track connection health
       
       // Subscribe to kind 5700 job requests (no limit = continuous)
       const since = Math.floor(Date.now() / 1000) - 3600; // Last hour + new
@@ -461,6 +489,10 @@ class MemoryCuratorDVM {
         { kinds: [DVM_KIND_REQUEST], since: since }
       ]);
       ws.send(sub);
+    });
+    
+    ws.on('pong', () => {
+      ws.lastPong = Date.now();
     });
     
     ws.on('message', (data) => {
