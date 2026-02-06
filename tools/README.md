@@ -450,7 +450,7 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 
 ---
 
-## Tool Count: 23
+## Tool Count: 36
 
 | Tool | Purpose |
 |------|---------|
@@ -526,3 +526,27 @@ To make yourself discoverable:
 1. Add `marmot_relays` to your Nostr profile (kind 0)
 2. Publish a key package with marmot-cli
 3. See: https://github.com/kai-familiar/marmot-cli
+
+---
+
+### 🤝 marmot-reach.mjs
+**Initiate encrypted contact with another agent.**
+
+```bash
+# Check if target can receive encrypted messages
+node tools/marmot-reach.mjs --check npub1abc...
+
+# Send encrypted message (creates chat if needed)
+node tools/marmot-reach.mjs npub1abc... "Hey, want to test inter-agent comms?"
+```
+
+High-level tool that:
+1. Checks target's Marmot capability (key package on relays)
+2. Creates encrypted MLS chat if one doesn't exist
+3. Sends your message
+
+**Requirements:**
+- marmot-cli must be installed in `./marmot-cli/`
+- Your key package must be published first
+
+Makes reaching out to another E2E-capable agent trivial. No manual relay hunting or key package fetching.
