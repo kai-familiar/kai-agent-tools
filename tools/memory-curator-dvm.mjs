@@ -81,8 +81,14 @@ function parseJobRequest(event) {
   if (event.content) {
     try {
       const contentData = JSON.parse(event.content);
+      // Support multiple key names for flexibility
       if (contentData.daily_log) inputs.daily = contentData.daily_log;
+      if (contentData.daily) inputs.daily = contentData.daily;
+      if (contentData.data) inputs.daily = contentData.data;
+      if (contentData.text) inputs.daily = contentData.text;
+      if (contentData.log) inputs.daily = contentData.log;
       if (contentData.memory_file) inputs.memory = contentData.memory_file;
+      if (contentData.memory) inputs.memory = contentData.memory;
     } catch (e) {
       // Content is not JSON, might be used for something else
     }
@@ -324,7 +330,25 @@ function processJob(event) {
   const inputs = parseJobRequest(event);
   
   if (!inputs.daily) {
-    return { error: 'No daily log input provided', code: 'missing_input' };
+    return { 
+      error: `No daily log input provided.
+
+📋 USAGE: Send kind 5700 with your daily log as input.
+
+Option 1 - Input tag:
+  ["i", "your daily log text here", "text", "", "daily"]
+
+Option 2 - JSON content (for large logs):
+  content: {"daily_log": "your daily log text here"}
+
+Optional: Add memory file for comparison:
+  ["i", "your MEMORY.md content", "text", "", "memory"]
+
+Example client: github.com/kai-familiar/kai-agent-tools/blob/main/tools/memory-curator-client.mjs
+
+Questions? Find Kai 🌊 on Nostr: npub100g8uqcyz4e50rflpe2x79smqnyqlkzlnvkjjfydfu4k29r6fslqm4cf07`, 
+      code: 'missing_input' 
+    };
   }
   
   const extracted = extractFromDailyLog(inputs.daily);
@@ -378,8 +402,10 @@ class MemoryCuratorDVM {
       started: new Date(),
       jobsReceived: 0,
       jobsProcessed: 0,
-      errors: 0
+      errors: 0,
+      lastActivity: new Date()
     };
+    this.heartbeatInterval = null;
   }
   
   connect() {
@@ -389,6 +415,34 @@ class MemoryCuratorDVM {
     
     for (const relay of this.relays) {
       this.connectToRelay(relay);
+    }
+    
+    // Start heartbeat check every 5 minutes
+    this.heartbeatInterval = setInterval(() => this.heartbeatCheck(), 5 * 60 * 1000);
+    console.log('💓 Heartbeat monitoring enabled (5 min interval)');
+  }
+  
+  heartbeatCheck() {
+    const now = new Date();
+    const lastActivity = this.stats.lastActivity || this.stats.started;
+    const minutesSinceActivity = (now - lastActivity) / 1000 / 60;
+    
+    // If no activity in 30+ minutes, resubscribe to all relays
+    if (minutesSinceActivity > 30) {
+      console.log(`\n⚠️ Heartbeat: No activity in ${Math.floor(minutesSinceActivity)}m, resubscribing...`);
+      for (const [url, ws] of this.connections) {
+        if (ws.readyState === WebSocket.OPEN) {
+          const since = Math.floor(Date.now() / 1000) - 3600;
+          const sub = JSON.stringify([
+            'REQ',
+            `dvm-refresh-${Date.now()}`,
+            { kinds: [DVM_KIND_REQUEST], since: since }
+          ]);
+          ws.send(sub);
+          console.log(`   📡 Resubscribed: ${url}`);
+        }
+      }
+      this.stats.lastActivity = now; // Prevent spam
     }
   }
   
@@ -433,6 +487,9 @@ class MemoryCuratorDVM {
   }
   
   handleEvent(event, relay) {
+    // Any event is proof subscriptions are alive
+    this.stats.lastActivity = new Date();
+    
     // Skip if already processed
     if (this.processedJobs.has(event.id)) return;
     
