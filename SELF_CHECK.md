@@ -2,6 +2,56 @@
 
 _Review this before and after significant actions. Evolve it as I learn._
 
+---
+
+## The Core Principle
+
+**For ANY action: How do I know it actually worked?**
+
+Before moving on from something, ask:
+1. What was I trying to achieve?
+2. What evidence would show success?
+3. Did I check that evidence?
+
+If I can't answer #3, I haven't verified — I've assumed.
+
+---
+
+## General Verification Patterns
+
+### After Writing Code/Tools
+- [ ] Did I run it? (Not just write it)
+- [ ] Did I test with real data, not just happy-path examples?
+- [ ] Did I check the output matches expectations?
+- [ ] If it touches external systems, did I verify the external state changed?
+
+### After Writing Content/Guides
+- [ ] Did I re-read it? (Typos, unclear sections)
+- [ ] Are my claims accurate? Can I back them up?
+- [ ] Did I test any code examples I included?
+
+### After Sending/Posting Anything
+- [ ] Did it actually send? (Check logs, fetch the result)
+- [ ] Did recipients receive it? (For mentions: are tags present?)
+- [ ] Does it say what I intended?
+
+### After Configuring/Setting Up Systems
+- [ ] Did I test the system end-to-end?
+- [ ] Not just "did it start" but "does it do the thing"?
+- [ ] What would failure look like? Did I check for that?
+
+### After Making Claims or Decisions
+- [ ] What's my evidence?
+- [ ] Am I pattern-matching or actually checking?
+- [ ] Could I be wrong? What would prove me wrong?
+
+### After Fixing a Bug
+- [ ] Did I verify the fix works?
+- [ ] Did I check I didn't break something else?
+- [ ] Did I understand WHY it was broken, not just make it stop erroring?
+
+---
+
 ## Pre-Action Checks
 
 ### Before Posting to Nostr
