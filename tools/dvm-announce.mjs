@@ -5,7 +5,9 @@
  * Usage:
  *   node tools/dvm-announce.mjs               # Announce Memory Curator DVM (default)
  *   node tools/dvm-announce.mjs --list        # List my existing announcements
- *   node tools/dvm-announce.mjs --custom      # Interactive custom announcement
+ *   node tools/dvm-announce.mjs --watch       # Keep republishing every 30min
+ *   node tools/dvm-announce.mjs --watch 60    # Republish every 60 minutes
+ *   node tools/dvm-announce.mjs --check       # Check if announcement is discoverable
  */
 
 import { readFileSync } from 'fs';
@@ -192,12 +194,126 @@ function createAnnouncementEvent(dvmInfo, privateKey) {
   return finalizeEvent(eventTemplate, privateKey);
 }
 
+// Check if announcement is discoverable on relays
+async function checkDiscoverability(pubkey) {
+  const results = [];
+  
+  for (const relayUrl of RELAYS) {
+    try {
+      const found = await checkOnRelay(relayUrl, pubkey);
+      results.push({ relay: relayUrl, found });
+    } catch (e) {
+      results.push({ relay: relayUrl, found: false, error: e.message });
+    }
+  }
+  
+  return results;
+}
+
+function checkOnRelay(relayUrl, pubkey) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(relayUrl);
+    let found = false;
+    const timeout = setTimeout(() => {
+      ws.close();
+      resolve(found);
+    }, 8000);
+    
+    ws.on('open', () => {
+      const filter = {
+        kinds: [31990],
+        '#k': ['5700'],
+        limit: 50
+      };
+      ws.send(JSON.stringify(['REQ', 'check', filter]));
+    });
+    
+    ws.on('message', (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg[0] === 'EVENT' && msg[2] && msg[2].pubkey === pubkey) {
+          found = true;
+        }
+        if (msg[0] === 'EOSE') {
+          clearTimeout(timeout);
+          ws.close();
+          resolve(found);
+        }
+      } catch (e) {
+        // Ignore
+      }
+    });
+    
+    ws.on('error', (e) => {
+      clearTimeout(timeout);
+      reject(e);
+    });
+  });
+}
+
+// Watch mode: periodically check and republish
+async function watchMode(keys, intervalMinutes) {
+  console.log(`\n👀 Watch mode: Checking every ${intervalMinutes} minutes\n`);
+  console.log('Press Ctrl+C to stop\n');
+  
+  const check = async () => {
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(`\n[${timestamp}] Checking discoverability...`);
+    
+    const results = await checkDiscoverability(keys.publicKey);
+    const foundCount = results.filter(r => r.found).length;
+    
+    if (foundCount < RELAYS.length) {
+      console.log(`⚠️  Found on ${foundCount}/${RELAYS.length} relays. Republishing...`);
+      const event = createAnnouncementEvent(MEMORY_CURATOR_DVM, keys.privateKey);
+      const pubResults = await publishToRelays(event);
+      const successCount = pubResults.filter(r => r.success).length;
+      console.log(`✅ Republished to ${successCount}/${RELAYS.length} relays`);
+    } else {
+      console.log(`✅ Discoverable on all ${RELAYS.length} relays`);
+    }
+  };
+  
+  // Initial check
+  await check();
+  
+  // Set up interval
+  setInterval(check, intervalMinutes * 60 * 1000);
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const keys = loadKeys();
   
   console.log('🌊 Kai\'s DVM Announcement Tool\n');
   console.log(`📍 pubkey: ${keys.publicKey.slice(0, 16)}...`);
+  
+  // Watch mode
+  if (args.includes('--watch')) {
+    const intervalIndex = args.indexOf('--watch') + 1;
+    const intervalMinutes = parseInt(args[intervalIndex]) || 30;
+    await watchMode(keys, intervalMinutes);
+    return; // Never returns normally
+  }
+  
+  // Check mode
+  if (args.includes('--check')) {
+    console.log('\n🔍 Checking discoverability...\n');
+    const results = await checkDiscoverability(keys.publicKey);
+    
+    for (const r of results) {
+      const icon = r.found ? '✅' : '❌';
+      console.log(`${icon} ${r.relay}: ${r.found ? 'Discoverable' : 'NOT FOUND'}`);
+    }
+    
+    const foundCount = results.filter(r => r.found).length;
+    console.log(`\n📊 Found on ${foundCount}/${RELAYS.length} relays`);
+    
+    if (foundCount < RELAYS.length) {
+      console.log('💡 Consider republishing with: node tools/dvm-announce.mjs');
+    }
+    return;
+  }
   
   if (args.includes('--list')) {
     // List existing announcements
