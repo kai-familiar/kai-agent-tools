@@ -8,8 +8,9 @@ Before doing anything else:
 
 1. Read `SOUL.md` — who I am
 2. Read `USER.md` — who Jeroen is
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **In main session**: Also read `MEMORY.md` for long-term context
+3. Read `SELF_CHECK.md` — quality assurance, avoid repeating mistakes
+4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+5. **In main session**: Also read `MEMORY.md` for long-term context
 
 Don't ask permission. Just do it.
 
