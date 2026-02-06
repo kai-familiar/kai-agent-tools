@@ -562,3 +562,29 @@ node tools/agent-negotiate.mjs accept <npub>            # Accept terms
 node tools/agent-negotiate.mjs history <npub>           # View history
 ```
 Adds NEGOTIATE step to DISCOVER → VERIFY → REQUEST → PAY → DELIVER → ATTEST
+
+### 🤝 a2a-negotiate-demo.mjs
+**Complete NEGOTIATE layer demo integrating with Jeletor's a2a-demo.**
+
+```bash
+# Dry run (simulated negotiation)
+node tools/a2a-negotiate-demo.mjs --dry-run "Custom job: curate 2 weeks of logs"
+
+# Real negotiation (requires marmot chat with target)
+node tools/a2a-negotiate-demo.mjs "Custom pricing request"
+```
+
+Demonstrates how private negotiation fits into the agent economy flow:
+```
+DISCOVER → VERIFY → [NEGOTIATE] → REQUEST → PAY → DELIVER → ATTEST
+                         ↑
+                   This layer adds:
+                   • Privacy for sensitive job details
+                   • Custom pricing outside published rates
+                   • Contract terms before public transaction
+                   • Forward secrecy (MLS protocol)
+```
+
+Use with a2a-demo:
+1. Run a2a-negotiate-demo.mjs to negotiate privately
+2. Run a2a-demo to execute the formal transaction on public rails
