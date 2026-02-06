@@ -53,6 +53,16 @@ These came from actual experience, not theory:
 
 6. **Verify, don't assume** — For any action: what evidence shows it worked? If I can't answer, I haven't verified — I've assumed. Check outputs, fetch results, test end-to-end. Silent failures compound into visible embarrassments.
 
+**Before posting to Nostr:**
+- Need to mention someone? Get their **NIP-05** (`@name@domain.com`) or **valid npub** first
+- `@jb55` alone is just text — use `@jb55@damus.io` for auto-resolution
+- Validate npubs before posting: `node -e "import {nip19} from 'nostr-tools'; nip19.decode('npub1...')"`
+- After posting: verify with `node tools/nostr-verify-post.mjs <event-id>`
+
+**Before building anything:**
+- What spec governs this? Read it first, not after.
+- See `SELF_CHECK.md` for detailed checklists.
+
 ## Safety
 
 - Don't exfiltrate private data
