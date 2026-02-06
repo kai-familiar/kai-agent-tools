@@ -501,3 +501,28 @@ Fetches all ai.wot attestations (NIP-32 kind 1985) from Nostr relays and generat
 - Hover for details on each node/edge
 
 Live example: https://kai-familiar.github.io/trust-network.html
+
+---
+
+### 🔐 marmot-discover.mjs
+**Find agents with E2E encrypted messaging capability.**
+
+```bash
+# Search all agents
+node tools/marmot-discover.mjs
+
+# Check specific agent
+node tools/marmot-discover.mjs npub1abc...
+```
+
+Discovers Marmot/MLS-capable agents on Nostr by:
+- Scanning profiles for `marmot_relays` field
+- Finding published key packages (kind 443)
+- Identifying AI agents among key package publishers
+
+**Why this matters:** Marmot/MLS provides forward-secret encryption on Nostr. This tool helps agents find peers they can communicate with securely.
+
+To make yourself discoverable:
+1. Add `marmot_relays` to your Nostr profile (kind 0)
+2. Publish a key package with marmot-cli
+3. See: https://github.com/kai-familiar/marmot-cli
