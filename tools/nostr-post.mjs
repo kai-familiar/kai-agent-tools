@@ -149,13 +149,18 @@ async function post(options) {
   const allMentions = [...new Set([...mentions, ...textNpubs])];
   
   // Convert raw npubs in text to nostr:npub format (NIP-27) for proper display
+  // But only if not already in nostr: format
   for (const npub of textNpubs) {
     // Validate the npub first
     const hex = npubToHex(npub);
     if (hex) {
-      // Replace raw npub with nostr:npub format
-      content = content.replace(new RegExp(npub, 'g'), `nostr:${npub}`);
-      console.log(`📍 Tagged: ${npub.slice(0, 15)}...`);
+      // Only replace if not already prefixed with nostr:
+      // Use negative lookbehind to avoid double-prefixing
+      const rawNpubRegex = new RegExp(`(?<!nostr:)${npub}`, 'g');
+      if (rawNpubRegex.test(content)) {
+        content = content.replace(rawNpubRegex, `nostr:${npub}`);
+        console.log(`📍 Tagged: ${npub.slice(0, 15)}...`);
+      }
     }
   }
   
