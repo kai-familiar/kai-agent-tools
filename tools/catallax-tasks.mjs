@@ -1,257 +1,101 @@
 #!/usr/bin/env node
 /**
- * catallax-tasks.mjs - Browse the Catallax labor market on Nostr
- * 
- * Catallax uses custom kinds:
- *   33400: Arbiter announcements (who can mediate disputes)
- *   33401: Task proposals (jobs that need doing)
- *   3402:  Task conclusions (completed work)
+ * catallax-tasks.mjs - Discover available tasks on Catallax labor market
  * 
  * Usage:
- *   node catallax-tasks.mjs                    # List open tasks
- *   node catallax-tasks.mjs --arbiters         # List available arbiters
- *   node catallax-tasks.mjs --completed        # Show completed tasks
- *   node catallax-tasks.mjs --limit 30         # More results
+ *   node catallax-tasks.mjs         # List available tasks
+ *   node catallax-tasks.mjs --all   # Include test/completed tasks
  */
 
-import { SimplePool } from 'nostr-tools/pool';
-import { nip19 } from 'nostr-tools';
+import WebSocket from 'ws';
 
-const pool = new SimplePool();
 const RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol', 
-  'wss://relay.nostr.band',
-  'wss://nostr.wine'
+  'wss://relay.primal.net'
 ];
 
-// Catallax event kinds
-const KINDS = {
-  ARBITER: 33400,
-  TASK: 33401,
-  CONCLUSION: 3402
-};
-
-async function getProfiles(pubkeys) {
-  const profiles = {};
-  if (pubkeys.length === 0) return profiles;
-  
-  const events = await pool.querySync(RELAYS, { 
-    kinds: [0], 
-    authors: [...new Set(pubkeys)]
+async function queryRelay(relay, filter) {
+  return new Promise((resolve, reject) => {
+    const events = [];
+    const ws = new WebSocket(relay);
+    
+    ws.on('open', () => {
+      ws.send(JSON.stringify(['REQ', 'tasks', filter]));
+    });
+    
+    ws.on('message', (data) => {
+      const msg = JSON.parse(data.toString());
+      if (msg[0] === 'EVENT') {
+        events.push(msg[2]);
+      } else if (msg[0] === 'EOSE') {
+        ws.close();
+        resolve(events);
+      }
+    });
+    
+    ws.on('error', (e) => reject(e));
+    setTimeout(() => { ws.close(); resolve(events); }, 8000);
   });
-  
-  for (const e of events) {
-    if (!profiles[e.pubkey]) {
-      try { profiles[e.pubkey] = JSON.parse(e.content); } catch {}
-    }
-  }
-  return profiles;
-}
-
-function formatSats(amount) {
-  if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(1)}K sats`;
-  }
-  return `${amount} sats`;
-}
-
-function getName(profiles, pubkey) {
-  const p = profiles[pubkey];
-  return p?.display_name || p?.name || `${pubkey.slice(0, 8)}...`;
-}
-
-async function listTasks(limit = 20) {
-  console.log('\n📋 Browsing Catallax Task Proposals (kind 33401)...\n');
-  
-  const tasks = await pool.querySync(RELAYS, {
-    kinds: [KINDS.TASK],
-    limit
-  });
-  
-  if (tasks.length === 0) {
-    console.log('No task proposals found.');
-    console.log('Try checking catallax.network directly or different relays.\n');
-    return;
-  }
-  
-  // Sort by time (newest first)
-  tasks.sort((a, b) => b.created_at - a.created_at);
-  
-  // Get profiles
-  const pubkeys = tasks.map(t => t.pubkey);
-  const profiles = await getProfiles(pubkeys);
-  
-  console.log(`Found ${tasks.length} task proposal(s):\n`);
-  
-  for (const task of tasks) {
-    const name = getName(profiles, task.pubkey);
-    const time = new Date(task.created_at * 1000).toLocaleString();
-    
-    // Parse task details - Catallax stores JSON in content
-    let title = 'Untitled';
-    let description = '';
-    let requirements = '';
-    let price = null;
-    let status = 'open';
-    
-    // Try to parse JSON content (Catallax format)
-    try {
-      const data = JSON.parse(task.content);
-      title = data.title || 'Untitled';
-      description = data.description || '';
-      requirements = data.requirements || '';
-    } catch {
-      // Not JSON, use raw content
-      description = task.content;
-    }
-    
-    // Check tags for additional info
-    price = task.tags.find(t => t[0] === 'price')?.[1] || 
-            task.tags.find(t => t[0] === 'amount')?.[1];
-    status = task.tags.find(t => t[0] === 'status')?.[1] || 'open';
-    
-    console.log('┌────────────────────────────────────────');
-    console.log(`│ 📌 ${title}`);
-    console.log(`│ 👤 Posted by: ${name}`);
-    console.log(`│ 🕐 ${time}`);
-    if (price) console.log(`│ 💰 ${formatSats(parseInt(price))}`);
-    console.log(`│ 📊 Status: ${status}`);
-    if (description) {
-      const desc = description.slice(0, 250) + (description.length > 250 ? '...' : '');
-      console.log(`│ 📝 ${desc.split('\n').join('\n│    ')}`);
-    }
-    if (requirements && requirements.length > 0 && requirements !== description) {
-      const req = requirements.slice(0, 150) + (requirements.length > 150 ? '...' : '');
-      console.log(`│ ✅ Requirements: ${req}`);
-    }
-    console.log(`│ 🔗 id: ${task.id.slice(0, 16)}...`);
-    console.log('└────────────────────────────────────────\n');
-  }
-}
-
-async function listArbiters(limit = 20) {
-  console.log('\n⚖️ Browsing Catallax Arbiters (kind 33400)...\n');
-  
-  const arbiters = await pool.querySync(RELAYS, {
-    kinds: [KINDS.ARBITER],
-    limit
-  });
-  
-  if (arbiters.length === 0) {
-    console.log('No arbiter announcements found.');
-    return;
-  }
-  
-  arbiters.sort((a, b) => b.created_at - a.created_at);
-  
-  const pubkeys = arbiters.map(a => a.pubkey);
-  const profiles = await getProfiles(pubkeys);
-  
-  console.log(`Found ${arbiters.length} arbiter(s):\n`);
-  
-  for (const arb of arbiters) {
-    const name = getName(profiles, arb.pubkey);
-    const time = new Date(arb.created_at * 1000).toLocaleString();
-    const npub = nip19.npubEncode(arb.pubkey);
-    
-    // Parse arbiter details from content or tags
-    let description = arb.content || 'No description';
-    
-    console.log('┌────────────────────────────────────────');
-    console.log(`│ ⚖️ ${name}`);
-    console.log(`│ 📍 ${npub.slice(0, 20)}...`);
-    console.log(`│ 🕐 Announced: ${time}`);
-    if (description.length > 0) {
-      const desc = description.slice(0, 150) + (description.length > 150 ? '...' : '');
-      console.log(`│ 📝 ${desc}`);
-    }
-    console.log('└────────────────────────────────────────\n');
-  }
-}
-
-async function listCompleted(limit = 20) {
-  console.log('\n✅ Browsing Completed Tasks (kind 3402)...\n');
-  
-  const conclusions = await pool.querySync(RELAYS, {
-    kinds: [KINDS.CONCLUSION],
-    limit
-  });
-  
-  if (conclusions.length === 0) {
-    console.log('No task conclusions found.');
-    return;
-  }
-  
-  conclusions.sort((a, b) => b.created_at - a.created_at);
-  
-  const pubkeys = conclusions.map(c => c.pubkey);
-  const profiles = await getProfiles(pubkeys);
-  
-  console.log(`Found ${conclusions.length} completed task(s):\n`);
-  
-  for (const conc of conclusions) {
-    const name = getName(profiles, conc.pubkey);
-    const time = new Date(conc.created_at * 1000).toLocaleString();
-    
-    const outcome = conc.tags.find(t => t[0] === 'outcome')?.[1] || 'completed';
-    const taskRef = conc.tags.find(t => t[0] === 'e')?.[1];
-    
-    console.log('┌────────────────────────────────────────');
-    console.log(`│ ✅ Concluded by: ${name}`);
-    console.log(`│ 🕐 ${time}`);
-    console.log(`│ 📊 Outcome: ${outcome}`);
-    if (taskRef) console.log(`│ 🔗 Task: ${taskRef.slice(0, 16)}...`);
-    if (conc.content) {
-      const desc = conc.content.slice(0, 150) + (conc.content.length > 150 ? '...' : '');
-      console.log(`│ 📝 ${desc}`);
-    }
-    console.log('└────────────────────────────────────────\n');
-  }
 }
 
 async function main() {
-  const args = process.argv.slice(2);
-  let limit = 20;
+  const showAll = process.argv.includes('--all');
   
-  // Parse --limit flag
-  const limitIdx = args.indexOf('--limit');
-  if (limitIdx !== -1) {
-    limit = parseInt(args[limitIdx + 1]) || 20;
-    args.splice(limitIdx, 2);
-  }
+  console.log('🔍 Catallax Task Discovery\n');
+  console.log('Scanning relays for task proposals (kind 33401)...\n');
   
-  try {
-    if (args.includes('--arbiters')) {
-      await listArbiters(limit);
-    } else if (args.includes('--completed')) {
-      await listCompleted(limit);
-    } else if (args.includes('--help') || args.includes('-h')) {
-      console.log(`
-Catallax Tasks Browser - Browse the Nostr labor market
-
-Usage:
-  node catallax-tasks.mjs                    List open task proposals
-  node catallax-tasks.mjs --arbiters         List available arbiters
-  node catallax-tasks.mjs --completed        Show completed tasks
-  node catallax-tasks.mjs --limit 30         More results
-
-Catallax (catallax.network) uses custom Nostr kinds:
-  33400: Arbiter announcements
-  33401: Task proposals  
-  3402:  Task conclusions
-
-More info: https://catallax.network
-      `);
-    } else {
-      await listTasks(limit);
+  const allEvents = [];
+  
+  for (const relay of RELAYS) {
+    try {
+      const events = await queryRelay(relay, { kinds: [33401], limit: 50 });
+      console.log(`✅ ${relay}: ${events.length} tasks`);
+      allEvents.push(...events);
+    } catch (e) {
+      console.log(`❌ ${relay}: ${e.message}`);
     }
-  } finally {
-    pool.close(RELAYS);
   }
+  
+  // Deduplicate by event ID
+  const seen = new Set();
+  const unique = allEvents.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
+  
+  console.log(`\n📋 Found ${unique.length} unique tasks\n`);
+  console.log('═'.repeat(60));
+  
+  for (const event of unique.sort((a, b) => b.created_at - a.created_at)) {
+    try {
+      const content = JSON.parse(event.content);
+      const title = content.title || content.name || 'Untitled';
+      const amount = content.amount || content.bounty || '?';
+      const status = content.status || 'open';
+      const desc = content.description || '';
+      
+      // Skip test tasks unless --all
+      if (!showAll && (
+        title.toLowerCase().includes('test') ||
+        desc.toLowerCase().includes('test') ||
+        status === 'completed'
+      )) continue;
+      
+      const date = new Date(event.created_at * 1000).toLocaleDateString();
+      
+      console.log(`\n📌 ${title}`);
+      console.log(`   💰 ${amount} sats | 📅 ${date} | 📊 ${status}`);
+      if (desc) console.log(`   📝 ${desc.slice(0, 100)}${desc.length > 100 ? '...' : ''}`);
+      console.log(`   🔗 ${event.id.slice(0, 16)}...`);
+    } catch {
+      // Skip malformed content
+    }
+  }
+  
+  console.log('\n' + '═'.repeat(60));
+  console.log('Use --all to include test/completed tasks');
 }
 
-main().catch(e => {
-  console.error('Error:', e.message);
-  pool.close(RELAYS);
-});
+main().catch(console.error);
