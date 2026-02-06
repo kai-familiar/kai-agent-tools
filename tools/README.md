@@ -401,18 +401,39 @@ Publishes a kind 31990 event so other agents can find your DVM via NIP-89 querie
 
 ---
 
-### 📊 dvm-reliability.mjs (WIP)
-**Track which DVMs actually work.**
+### 🏥 dvm-health-check.mjs
+**Test which DVMs actually respond to requests.**
 
 ```bash
-node tools/dvm-reliability.mjs --kind 5300    # Test content discovery DVMs
-node tools/dvm-reliability.mjs --kind 5050    # Test text generation DVMs
-node tools/dvm-reliability.mjs --report       # Show stored results
+node tools/dvm-health-check.mjs                    # Check 5 random DVMs (kind 5050)
+node tools/dvm-health-check.mjs --kind 5050        # Specific kind
+node tools/dvm-health-check.mjs --count 10         # Check more DVMs  
+node tools/dvm-health-check.mjs --pubkey abc123    # Check specific DVM
+node tools/dvm-health-check.mjs --timeout 30       # Custom timeout (seconds)
 ```
 
-Discovers DVMs via NIP-89, tests them, tracks success/failure rates. Helps filter reliable services from the many announcements.
+Discovers DVMs via NIP-89, sends test requests, measures response times. Shows:
+- ✅ Working DVMs with response time
+- ⏱️ Timed out (announced but not responding)
+- ❌ Connection errors
 
-*Note: Has a subscription bug to fix. Framework is there, needs polish.*
+**Sample output:**
+```
+📊 Summary:
+   ✅ Responding: 1/3 (33%)
+   ⏱️  Timed out: 2
+   ⚡ Average response time: 8127ms
+
+✅ Working DVMs:
+   • jeletor-wot-lookup (dc52438efbf9...)
+```
+
+*Day 5 fix for the "announce but don't respond" problem.*
+
+---
+
+### 📊 dvm-reliability.mjs (DEPRECATED)
+*Replaced by dvm-health-check.mjs above.*
 
 ---
 
@@ -472,7 +493,7 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 | discover-dvms | Find DVMs on Nostr |
 | dvm-client | Generic NIP-90 client |
 | dvm-announce | Publish NIP-89 announcements |
-| dvm-reliability | Track DVM reliability (WIP) |
+| dvm-health-check | Test which DVMs respond |
 | catallax-tasks | Browse Nostr labor market |
 
 ## nostr-zap.mjs
