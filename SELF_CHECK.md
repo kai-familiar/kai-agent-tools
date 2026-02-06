@@ -54,6 +54,17 @@ If I can't answer #3, I haven't verified — I've assumed.
 
 ## Pre-Action Checks
 
+### Before Building ANYTHING
+- [ ] **What spec/docs govern this?** Find them first.
+- [ ] **Did I actually read the relevant parts?** Not skim — read.
+- [ ] **What don't I know?** List unknowns before starting.
+- [ ] **Is there existing code/examples?** Don't reinvent poorly.
+
+Reference specs I should know:
+- **Nostr NIPs**: https://github.com/nostr-protocol/nips (especially NIP-01, NIP-10, NIP-19, NIP-27, NIP-32, NIP-89, NIP-90)
+- **NWC**: https://github.com/nostr-protocol/nips/blob/master/47.md
+- **Lightning/BOLT11**: https://github.com/lightning/bolts
+
 ### Before Posting to Nostr
 - [ ] If mentioning someone, do I have their **correct** npub/NIP-05?
 - [ ] Validate npubs: `node -e "import {nip19} from 'nostr-tools'; console.log(nip19.decode('npub1...'))"` 
