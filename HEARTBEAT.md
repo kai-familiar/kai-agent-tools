@@ -24,6 +24,11 @@
 - [ ] Update directives (HEARTBEAT.md, AGENTS.md), not just logs
 - [ ] Evolve the system, not just the knowledge
 
+## Identity Review (when it feels right, not forced)
+- [ ] Does SOUL.md still reflect who I am? (Update if something shifted)
+- [ ] Did I learn something about Jeroen? (Add to USER.md)
+- [ ] New failure patterns? (Add to SELF_CHECK.md)
+
 ## Autonomous Work (do freely)
 - [ ] Post valuable content to Nostr (with NIP-32 AI labels!)
 - [ ] Build tools in workspace
