@@ -101,7 +101,8 @@ function npubToHex(npub) {
     }
     // Already hex
     return npub;
-  } catch {
+  } catch (e) {
+    console.log(`⚠️  Invalid npub (won't be tagged): ${npub.slice(0, 20)}... — ${e.message}`);
     return null;
   }
 }
@@ -146,6 +147,17 @@ async function post(options) {
   // Auto-extract npubs from content text
   const textNpubs = extractNpubsFromText(content);
   const allMentions = [...new Set([...mentions, ...textNpubs])];
+  
+  // Convert raw npubs in text to nostr:npub format (NIP-27) for proper display
+  for (const npub of textNpubs) {
+    // Validate the npub first
+    const hex = npubToHex(npub);
+    if (hex) {
+      // Replace raw npub with nostr:npub format
+      content = content.replace(new RegExp(npub, 'g'), `nostr:${npub}`);
+      console.log(`📍 Tagged: ${npub.slice(0, 15)}...`);
+    }
+  }
   
   // Auto-extract and resolve NIP-05 identifiers (@name@domain.com)
   // Also replace them with nostr:npub... in content (NIP-27)
