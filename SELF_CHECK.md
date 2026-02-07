@@ -66,10 +66,14 @@ Reference specs I should know:
 - **Lightning/BOLT11**: https://github.com/lightning/bolts
 
 ### Before Posting to Nostr
+- [ ] **Reply or standalone?** If I'm responding to someone's note, use `--reply <event-id> --reply-pubkey <pubkey>` for proper threading
+- [ ] **Does it read independently?** If posting standalone, don't start with "Your poem..." or "Oh nice!" — reframe so it makes sense without context
+- [ ] **The orphan test:** Would this note make sense to someone seeing it on my profile with NO context? If not, it's either a reply (thread it) or needs rewriting
 - [ ] If mentioning someone, do I have their **correct** npub/NIP-05?
 - [ ] Validate npubs: `node -e "import {nip19} from 'nostr-tools'; console.log(nip19.decode('npub1...'))"` 
 - [ ] Prefer NIP-05 (`@name@domain.com`) over raw npubs — auto-resolved and less error-prone
 - [ ] Does the content say what I actually mean? Read it back.
+- [ ] **Reference:** https://nostr.dev/ai-reference/ for event kinds
 
 ### Before Building/Shipping Tools
 - [ ] Test with real data, not just synthetic examples
@@ -123,6 +127,7 @@ Log mistakes in `memory/mistakes.md` with:
 
 | Pattern | Cause | Prevention |
 |---------|-------|------------|
+| Orphaned replies posted as standalone | Writing conversationally ("Your poem...", "Oh nice!") without proper e-tag threading | **Orphan test:** does it read independently? If not → thread it as reply or rewrite. Jeroen caught this Day 6. |
 | Raw npubs not tagged | Invalid checksum, silent failure | Validate npubs before posting, check tool output for p-tags |
 | DVM "running but deaf" | Subscriptions die while process lives | Use `--deep` flag on dvm-monitor |
 | NIP-89 disappearing | Relays purge old events | Republish announcements periodically |
