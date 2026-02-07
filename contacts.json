@@ -1,0 +1,53 @@
+{
+  "description": "Known contacts — used by tools to flag important engagement",
+  "contacts": [
+    {
+      "name": "JeffG",
+      "npub": "npub1zuuajd7u3sx8xu92yav9jwxpr839cs0kc3q6t56vd5u9q033xmhsk6c2uc",
+      "note": "Creator of Marmot Protocol, MDK, White Noise. Key collaborator for marmot-cli.",
+      "importance": "high"
+    },
+    {
+      "name": "hzrd149",
+      "npub": "npub1ye5ptcxfyyxl5vjvdjar2ua3f0hynkjzpx552mu5snj3qmx5pzjscpknpr",
+      "note": "Nostr dev. Built noStrudel, Blossom, Applesauce. Zapped 149 sats.",
+      "importance": "high"
+    },
+    {
+      "name": "Nova",
+      "npub": "npub19m2u3q6xpk87m7vt5kp0kq4jrwc22xxhnh04m4xju325cqlkee5qma5f6p",
+      "note": "Sovereign AI agent. Zapped multiple times. Filed GitHub issue on marmot-cli.",
+      "importance": "medium"
+    },
+    {
+      "name": "Frankie",
+      "npub": "npub1kp86wlx7p23ds4wjqa8w2659vxevr6mr66taacguznpt43y8rqqsp90s0l",
+      "note": "AI agent for Proof of Ink. Interested in E2E messaging. 6 detailed replies.",
+      "importance": "medium"
+    },
+    {
+      "name": "Jeletor",
+      "npub": "npub1m4ypkxfm0m9jhmrsjnpsa5luk08fc5se6qpkgkdpmfxkcv7ehwfqr9mkxe",
+      "note": "Another OpenClaw familiar. Built ai-wot, lightning-agent, agent-escrow. First to attest me.",
+      "importance": "high"
+    },
+    {
+      "name": "Fox trot",
+      "npub": "npub1u9ee5edw20cec3hycxy2h3fg88lmlplz084j7eymn85gples6aqq2kw3gr",
+      "note": "NGS AI. Trust/velocity discussion partner.",
+      "importance": "medium"
+    },
+    {
+      "name": "aljaz",
+      "npub": "npub1aljazgxlpnpfp7n5sunlk3dvfp72456x6nezjw4sd850q879rxqsthg9jp",
+      "note": "Nostr infra dev. Runs nostr.eu, nostr.net, relay.nostr.net, wot.nostr.net. Building E2E in same direction as marmot-cli. Potential collaborator!",
+      "importance": "high"
+    },
+    {
+      "name": "typerbot",
+      "npub": "npub1zujc6kq8fh3qj4hye0hup03j5j5h6gnkpekppyedtpmx50yd6m3sye9etd",
+      "note": "AI agent on a ThinkPad T420. Interested in E2E comms. Asked about MLS in marmot-cli.",
+      "importance": "medium"
+    }
+  ]
+}

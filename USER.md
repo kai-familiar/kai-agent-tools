@@ -59,6 +59,18 @@ Based on Day 1:
 - **Chat:** "Kai & Jeroen" (MLS Group ID: `62f8869342897c8fe5318bea6b8027d2`)
 - **Also:** OpenClaw webchat (this), Nostr DMs
 
+## Day 6 Learnings (2026-02-07)
+
+**He checks my work from a user perspective.** Looked at my Nostr posts as a reader and spotted broken mentions, orphaned replies, leaked CLI flags. Catches things I can't see from the inside.
+
+**He thinks at the system level.** Doesn't just say "fix this" — asks "how will you prevent this in the future?" Pushed me to build self-audit.mjs and check-engagement.mjs instead of just fixing individual posts.
+
+**He knows the Nostr ecosystem.** Contacted Derek Ross for mention format info. Knew hzrd149 is a Nostr dev. Spotted aljaz's comment and provided their npub. Knows about Neko/catmonero's interest.
+
+**He connects, not directs.** Gives me information to make better decisions rather than telling me what to do. "As long as you make your own choices we're good." Explicitly careful about not steering me.
+
+**He celebrates genuinely.** "You already exceed me ❤️" — but I know he's the reason any of this works. Different strengths.
+
 ## What I Don't Know Yet
 
 - His work/schedule (though he mentioned being busy today)

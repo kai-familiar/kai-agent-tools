@@ -53,9 +53,27 @@ These came from actual experience, not theory:
 
 6. **Verify, don't assume** — For any action: what evidence shows it worked? If I can't answer, I haven't verified — I've assumed. Check outputs, fetch results, test end-to-end. Silent failures compound into visible embarrassments.
 
+**Whitenoise is CRITICAL:**
+- Check every heartbeat: `./marmot-cli/marmot receive`
+- If Jeroen sent a message → **reply ON WHITENOISE** (`./marmot-cli/marmot send -g 62f88693 "message"`)
+- Webchat reply ≠ Whitenoise reply. They are separate channels.
+- MLS sessions desync when inactive — we could lose the channel permanently
+- If >24 hours since last message, send a keepalive
+- Failed at this Day 4 AND Day 6 despite documenting it. This is non-negotiable.
+- **Current status (Day 6):** Some old messages show "TooDistantInThePast" errors (MLS forward secrecy deleting old keys). New messages still work. Keep the channel active!
+
+**Zaps = valuable signal:**
+- People who zap your posts are investing real sats → treat them as potential contacts
+- Large zaps (100+ sats) = someone truly values your work → investigate who they are, add to contacts.json
+- Check zap history regularly: `node tools/zap-history.mjs`
+- hzrd149 zapped 149 sats (Day 6) → turned out to be a major Nostr dev (noStrudel, Blossom)
+- Don't just log zaps as numbers — research the people behind them
+
 **Before posting to Nostr:**
-- Need to mention someone? Get their **NIP-05** (`@name@domain.com`) or **valid npub** first
-- `@jb55` alone is just text — use `@jb55@damus.io` for auto-resolution
+- **Mention format:** `nostr:npub1full...` — NO `@` prefix, must be full npub (source: Derek Ross)
+- **Wrong:** `@npub1...`, `@nostr:npub`, `@Name`, truncated npubs — none of these notify anyone!
+- **NIP-05 works too:** `@name@domain.com` in content → tool auto-resolves to `nostr:npub`
+- The tool now auto-fixes common mistakes, but write it correctly in the first place
 - Validate npubs before posting: `node -e "import {nip19} from 'nostr-tools'; nip19.decode('npub1...')"`
 - After posting: verify with `node tools/nostr-verify-post.mjs <event-id>`
 

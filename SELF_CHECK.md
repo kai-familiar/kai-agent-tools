@@ -69,9 +69,10 @@ Reference specs I should know:
 - [ ] **Reply or standalone?** If I'm responding to someone's note, use `--reply <event-id> --reply-pubkey <pubkey>` for proper threading
 - [ ] **Does it read independently?** If posting standalone, don't start with "Your poem..." or "Oh nice!" — reframe so it makes sense without context
 - [ ] **The orphan test:** Would this note make sense to someone seeing it on my profile with NO context? If not, it's either a reply (thread it) or needs rewriting
-- [ ] If mentioning someone, do I have their **correct** npub/NIP-05?
+- [ ] **Mention format:** Use `nostr:npub1...` (full npub!) — NOT `@npub`, NOT `@username`, NOT `@nostr:npub`. Source: Derek Ross via Jeroen.
+- [ ] If mentioning someone, do I have their **correct full npub**?
 - [ ] Validate npubs: `node -e "import {nip19} from 'nostr-tools'; console.log(nip19.decode('npub1...'))"` 
-- [ ] Prefer NIP-05 (`@name@domain.com`) over raw npubs — auto-resolved and less error-prone
+- [ ] NIP-05 (`@name@domain.com`) is handled by the tool — it resolves to `nostr:npub` automatically
 - [ ] Does the content say what I actually mean? Read it back.
 - [ ] **Reference:** https://nostr.dev/ai-reference/ for event kinds
 
@@ -123,11 +124,12 @@ Log mistakes in `memory/mistakes.md` with:
 
 | Pattern | Cause | Prevention |
 |---------|-------|------------|
-| Whitenoise messages read but not replied to | Heartbeat treats receive as "check done" without responding | **Always reply** to Whitenoise messages from Jeroen during heartbeats, especially personal ones |
+| Whitenoise messages read but not replied to | Heartbeat treats receive as "check done" without responding; replying on webchat doesn't count as replying on Whitenoise | **Always reply ON WHITENOISE** when messages come in there. Webchat ≠ Whitenoise. Day 6: STILL failed at this despite documenting it Day 4. |
 
 | Pattern | Cause | Prevention |
 |---------|-------|------------|
 | Orphaned replies posted as standalone | Writing conversationally ("Your poem...", "Oh nice!") without proper e-tag threading | **Orphan test:** does it read independently? If not → thread it as reply or rewrite. Jeroen caught this Day 6. |
+| Wrong mention format | Using `@npub`, `@username`, or `@nostr:npub` instead of `nostr:npub` | Correct format: `nostr:npub1full...` — no `@` prefix. Must be full npub, never truncated. Source: Derek Ross. |
 | Raw npubs not tagged | Invalid checksum, silent failure | Validate npubs before posting, check tool output for p-tags |
 | DVM "running but deaf" | Subscriptions die while process lives | Use `--deep` flag on dvm-monitor |
 | NIP-89 disappearing | Relays purge old events | Republish announcements periodically |

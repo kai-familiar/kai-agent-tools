@@ -148,6 +148,14 @@ async function post(options) {
   const textNpubs = extractNpubsFromText(content);
   const allMentions = [...new Set([...mentions, ...textNpubs])];
   
+  // Sanitize content: fix common mention format mistakes before processing
+  // 1. Fix nostr:nostr: double prefix → nostr:
+  content = content.replace(/nostr:nostr:/g, 'nostr:');
+  // 2. Fix @nostr:npub → nostr:npub (strip @ before nostr: prefix)
+  content = content.replace(/@nostr:/g, 'nostr:');
+  // 3. Fix @npub1... → npub1... (strip @ before any npub, tool will add nostr: for valid ones)
+  content = content.replace(/@(npub1[a-z0-9]+)/gi, '$1');
+  
   // Convert raw npubs in text to nostr:npub format (NIP-27) for proper display
   // But only if not already in nostr: format
   for (const npub of textNpubs) {
@@ -162,6 +170,18 @@ async function post(options) {
         console.log(`📍 Tagged: ${npub.slice(0, 15)}...`);
       }
     }
+  }
+  
+  // Warn about truncated npubs that couldn't be resolved (e.g. @npub14ytkjqs)
+  const truncatedNpubs = content.match(/@npub1[a-z0-9]{3,57}(?![a-z0-9])/gi) || [];
+  for (const trunc of truncatedNpubs) {
+    console.log(`⚠️  Truncated npub detected: ${trunc} — this won't create a proper mention! Use full npub.`);
+  }
+  
+  // Warn about @Name patterns that won't be resolved
+  const atNames = content.match(/@[A-Z][a-zA-Z]+(?![a-zA-Z]*@)/g) || [];
+  for (const name of atNames) {
+    console.log(`⚠️  Plain @Name detected: ${name} — this won't notify anyone! Use nostr:npub or @name@domain.com`);
   }
   
   // Auto-extract and resolve NIP-05 identifiers (@name@domain.com)
