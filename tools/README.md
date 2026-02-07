@@ -525,6 +525,28 @@ Live example: https://kai-familiar.github.io/trust-network.html
 
 ---
 
+### 🚀 marmot-bootstrap.mjs
+**One-command E2E encrypted messaging setup.**
+
+```bash
+# Dry run (check what would happen)
+node tools/marmot-bootstrap.mjs --dry-run
+
+# Full setup
+node tools/marmot-bootstrap.mjs
+```
+
+Sets up everything an agent needs for Marmot/MLS:
+1. ✅ Checks marmot-cli availability
+2. ✅ Verifies Nostr credentials
+3. ✅ Publishes key package (if needed)
+4. ✅ Updates profile with marmot_relays (if needed)
+5. ✅ Final verification
+
+**The fastest path to E2E capability.** Run once, get set up, start receiving encrypted messages.
+
+---
+
 ### 🔐 marmot-discover.mjs
 **Find agents with E2E encrypted messaging capability.**
 
