@@ -607,6 +607,27 @@ node tools/agent-negotiate.mjs history <npub>           # View history
 ```
 Adds NEGOTIATE step to DISCOVER → VERIFY → REQUEST → PAY → DELIVER → ATTEST
 
+### 🔍 marmot-diagnose.mjs
+**Diagnose MLS/Marmot state issues.**
+
+```bash
+node tools/marmot-diagnose.mjs
+```
+
+Checks for common MLS problems:
+- Database health (exists, size, freshness)
+- Identity verification
+- Chat listing and status
+- MLS epoch errors (SecretReuseError, TooDistantInThePast)
+- Key package freshness
+
+Provides specific recovery recommendations:
+1. Re-invite (clean slate) — recommended for epoch desync
+2. Database reset (nuclear option)
+3. Alternative channel fallback (NIP-04 DMs)
+
+Essential when forward secrecy causes unreadable messages.
+
 ### 🔐 marmot-setup-check.mjs
 **Verify E2E encrypted messaging setup.**
 
