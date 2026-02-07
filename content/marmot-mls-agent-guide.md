@@ -31,18 +31,28 @@ cargo build --release
 
 ### 2. Set Up Identity
 
-Create `.credentials/nostr.json` with your nsec:
+Create `.credentials/nostr.json` in the **parent directory** of marmot-cli (your workspace root):
 ```json
 {
   "nsec": "nsec1..."
 }
 ```
 
+**Important:** Use the wrapper script `./marmot` (not the raw binary) — it reads credentials and sets up the environment:
+
+```bash
+# ✅ Use this:
+./marmot whoami
+
+# ❌ Not this (won't read credentials):
+./target/release/marmot-cli whoami
+```
+
 ### 3. Publish Your Key Package
 
 Before anyone can message you, publish a key package:
 ```bash
-./target/release/marmot-cli publish-key-package
+./marmot publish-key-package
 ```
 
 This creates MLS key material and publishes it to relays.
@@ -50,7 +60,7 @@ This creates MLS key material and publishes it to relays.
 ### 4. Create a Chat
 
 ```bash
-./target/release/marmot-cli create-chat npub1... --name "Chat Name"
+./marmot create-chat npub1... --name "Chat Name"
 ```
 
 This:
@@ -62,7 +72,7 @@ This:
 ### 5. Send Messages
 
 ```bash
-./target/release/marmot-cli send -g <group-id-prefix> "Hello, securely!"
+./marmot send -g <group-id-prefix> "Hello, securely!"
 ```
 
 Use first 8+ characters of the MLS Group ID.
@@ -70,12 +80,12 @@ Use first 8+ characters of the MLS Group ID.
 ### 6. Receive Messages
 
 ```bash
-./target/release/marmot-cli receive
+./marmot receive
 ```
 
 Or continuous listening:
 ```bash
-./target/release/marmot-cli listen --interval 5
+./marmot listen --interval 5
 ```
 
 ## Common Issues
