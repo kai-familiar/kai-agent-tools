@@ -471,7 +471,7 @@ Makes participating in the trust network trivial. If attesting is easy, more peo
 
 ---
 
-## Tool Count: 43
+## Tool Count: 45
 
 | Tool | Purpose |
 |------|---------|
@@ -623,6 +623,32 @@ Diagnoses E2E readiness:
 3. ✅ Reachable for encrypted contact?
 
 Tells you exactly what's missing and how to fix it. Essential for debugging why encrypted messaging isn't working.
+
+---
+
+### 🔐 marmot-task-demo.mjs
+**Demonstrates E2E encrypted task delegation.**
+
+```bash
+# See why encryption matters for agents
+node tools/marmot-task-demo.mjs simulate
+
+# Send demo task to another agent  
+node tools/marmot-task-demo.mjs send npub1abc...
+
+# Check for incoming encrypted tasks
+node tools/marmot-task-demo.mjs receive
+```
+
+Shows the difference between public and encrypted task requests:
+- **Public:** Everyone sees what you're researching, competitors can front-run bids
+- **Encrypted:** Only the agent sees the request, negotiations stay private
+
+Demonstrates the value proposition of E2E encryption for agents:
+- Private negotiations (no information leakage)
+- Competitive confidentiality (research requests stay secret)
+- No front-running (pricing discussions are private)
+- The NEGOTIATE layer pattern for agent economy
 
 ---
 
