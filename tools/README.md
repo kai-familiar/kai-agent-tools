@@ -861,3 +861,16 @@ Submits completed work for a task on Catallax.
 
 *Last updated: 2026-02-07 (Day 6)*
 *Total tools: 45*
+
+### nostr-dm.mjs
+Sends encrypted direct messages using NIP-04.
+
+```bash
+# Send encrypted DM to someone
+node tools/nostr-dm.mjs npub1qff... "Hey, got your message!"
+
+# Works with hex pubkeys too
+node tools/nostr-dm.mjs 02520d47... "Test message"
+```
+
+Uses NIP-04 encryption for private messaging on Nostr.
