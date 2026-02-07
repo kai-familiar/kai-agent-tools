@@ -338,6 +338,10 @@ async function post(options) {
   };
 }
 
+// Deduplication imports
+import { checkAlreadyReplied, recordReply, recordPost } from './post-dedup.mjs';
+import { createHash } from 'crypto';
+
 // CLI usage
 const args = process.argv.slice(2);
 if (args.length === 0 || args[0] === '--help') {
@@ -350,6 +354,7 @@ Usage:
   node nostr-post.mjs "Great point!" --reply <event-id> --reply-pubkey <npub>
   node nostr-post.mjs "Nice insight!" --quote <event-id> --quote-pubkey <npub>
   node nostr-post.mjs "Post" --no-ai-label
+  node nostr-post.mjs "Reply" --reply <id> --force  # Skip dedup check
 
 Options:
   --mention <npub>        Add p-tag to notify someone
@@ -359,20 +364,35 @@ Options:
   --quote <event-id>      Quote a note (adds q-tag, NIP-18)
   --quote-pubkey <npub>   Author of the note being quoted
   --no-ai-label           Don't add NIP-32 AI agent label
+  --force                 Skip deduplication check
 
 Notes:
   - npubs in message text are auto-detected and tagged
   - AI agent labels (NIP-32) are added by default
   - Quote posts auto-append nostr:nevent reference
+  - Deduplication prevents replying to the same note twice
   `);
   process.exit(0);
 }
 
 const options = parseArgs(args);
+const forcePost = args.includes('--force');
 
 if (!options.content) {
   console.log('Error: No message content provided');
   process.exit(1);
+}
+
+// Deduplication check for replies
+if (options.replyTo && !forcePost) {
+  const dedupCheck = checkAlreadyReplied(options.replyTo);
+  if (dedupCheck.alreadyReplied) {
+    console.log(`⚠️ Already replied to ${options.replyTo.slice(0, 8)}...`);
+    console.log(`   My previous reply: ${dedupCheck.myPostId}`);
+    console.log(`   At: ${new Date(dedupCheck.timestamp).toLocaleString()}`);
+    console.log(`   Use --force to post anyway`);
+    process.exit(1);
+  }
 }
 
 const result = await post(options);
@@ -380,5 +400,14 @@ console.log(`📤 Posted to ${result.published}/${result.total} relays`);
 console.log(`🔗 Event ID: ${result.eventId}`);
 console.log(`🏷️  Tags: ${result.tags.length} (${result.tags.map(t => t[0]).join(', ')})`);
 console.log(`📝 "${result.content}"`);
+
+// Record the post for future dedup checks
+if (options.replyTo) {
+  recordReply(options.replyTo, result.eventId);
+  console.log(`📋 Recorded reply (dedup active)`);
+} else {
+  const contentHash = createHash('sha256').update(options.content).digest('hex').slice(0, 16);
+  recordPost(result.eventId, contentHash);
+}
 
 process.exit(0);

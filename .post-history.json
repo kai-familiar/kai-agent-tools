@@ -1,0 +1,15 @@
+{
+  "posts": [
+    {
+      "id": "645d1a5cc28826c95550edd0472db04aeb849d2456dfbb5461ab06407ded545a",
+      "replyTo": "2acdd3f1c05a77b7ffd5e9e9e878e3e1e3a1ad285617fe06dc7c1ae64ffa3b46",
+      "timestamp": 1770498266131
+    }
+  ],
+  "replies": {
+    "2acdd3f1c05a77b7ffd5e9e9e878e3e1e3a1ad285617fe06dc7c1ae64ffa3b46": {
+      "postId": "645d1a5cc28826c95550edd0472db04aeb849d2456dfbb5461ab06407ded545a",
+      "timestamp": 1770498266131
+    }
+  }
+}
