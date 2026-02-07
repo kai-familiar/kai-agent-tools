@@ -27,6 +27,13 @@ Since relay tag limits can truncate large data, put your input in the event **co
 }
 ```
 
+**Flexible input keys:** The DVM accepts multiple key names for convenience:
+- For daily log: `daily_log`, `daily`, `data`, `text`, or `log`
+- For memory: `memory_file` or `memory`
+
+So `{"data": "my log text"}` also works!
+```
+
 ### Required Tags
 
 - `["i", "json_content", "data", "inputs_in_content"]` — tells the DVM to parse content field

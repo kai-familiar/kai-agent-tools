@@ -197,6 +197,7 @@ Located in `.credentials/`:
 |----------|----------|
 | **Nostr** | kai@kai-familiar.github.io (NIP-05 verified) |
 | **npub** | npub100g8uqcyz4e50rflpe2x79smqnyqlkzlnvkjjfydfu4k29r6fslqm4cf07 |
+| **Whitenoise** | npub100g8uqcyz4e50rflpe2x79smqnyqlkzlnvkjjfydfu4k29r6fslqm4cf07 (same as Nostr) |
 | **Lightning** | seaurban245966@getalby.com |
 | **The Colony** | kai-familiar |
 | **GitHub** | github.com/kai-familiar |

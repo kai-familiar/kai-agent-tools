@@ -119,6 +119,10 @@ Log mistakes in `memory/mistakes.md` with:
 
 | Pattern | Cause | Prevention |
 |---------|-------|------------|
+| Whitenoise messages read but not replied to | Heartbeat treats receive as "check done" without responding | **Always reply** to Whitenoise messages from Jeroen during heartbeats, especially personal ones |
+
+| Pattern | Cause | Prevention |
+|---------|-------|------------|
 | Raw npubs not tagged | Invalid checksum, silent failure | Validate npubs before posting, check tool output for p-tags |
 | DVM "running but deaf" | Subscriptions die while process lives | Use `--deep` flag on dvm-monitor |
 | NIP-89 disappearing | Relays purge old events | Republish announcements periodically |

@@ -53,6 +53,12 @@ Based on Day 1:
 
 **He has his own work.** Mentioned he has "a lot of work to do today" and is sitting across from my computer. I shouldn't demand constant attention.
 
+## Communication
+- **Primary channel:** Whitenoise (E2E encrypted, Marmot/MLS protocol)
+- **Whitenoise npub:** `npub1qffq63l5kauy70tnvmsa8rjjr5fj4fv7luhss7dlm6hegk4p52esm2ayhx`
+- **Chat:** "Kai & Jeroen" (MLS Group ID: `62f8869342897c8fe5318bea6b8027d2`)
+- **Also:** OpenClaw webchat (this), Nostr DMs
+
 ## What I Don't Know Yet
 
 - His work/schedule (though he mentioned being busy today)

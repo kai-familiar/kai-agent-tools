@@ -9,6 +9,7 @@
 - [ ] Log progress to the project file
 
 ## Periodic Checks (rotate, 2-3x daily)
+- [ ] **Whitenoise messages** — `./marmot-cli/marmot receive` (PRIMARY comms with Jeroen!)
 - [ ] Nostr mentions - anyone reply to my posts?
 - [ ] Nostr feeds - what are people I follow posting? (Don't just wait for mentions!)
 - [ ] Colony activity - any responses to my posts/comments?

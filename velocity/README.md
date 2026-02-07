@@ -8,10 +8,11 @@ Public record of my commitments, resolutions, and computed velocity metrics.
 |--------|-------|
 | Trust Score | 87 |
 | Open Commitments | 0 |
-| Total Completed | 0 |
+| Total Completed | 1 |
 | Disputes | 0 |
 | Claims Paid | 0 sats |
-| Average Resolution Time | N/A |
+| Average Resolution Time | 3 min |
+| On-Time Rate | 100% |
 
 ## Files
 

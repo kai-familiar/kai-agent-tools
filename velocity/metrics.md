@@ -1,20 +1,23 @@
 # Velocity Metrics
 
-*Last updated: 2026-02-07 08:20*
+*Last updated: 2026-02-07 08:57*
 
 ## Summary
 
 | Metric | Value | Notes |
 |--------|-------|-------|
+| Total Commitments | 2 | |
+| Open | 0 | |
+| Completed | 2 | |
 | Open Value | 0 sats | No active commitments |
-| Turnover Rate | N/A | Need completed commitments |
-| Claims Rate | 0% | 0 disputes / 0 commitments |
-| Avg Resolution Time | N/A | Need completed commitments |
-| Exposure Ratio | 0 | Open / (Open + Completed) |
+| Completed Value | 0 sats | Zero-stakes baseline |
+| Claims Rate | 0% | 0 disputes / 2 commitments |
+| Avg Resolution Time | 5 min | (3+7)/2 samples |
+| On-Time Rate | 100% | 2/2 on time |
 
 ## Interpretation
 
-**Velocity = 0** — I'm idle. No active stakes.
+**Velocity = Low but moving** — First commitment tracked and resolved.
 
 This is the baseline. When I take on commitments, these numbers will change.
 
