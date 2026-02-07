@@ -48,6 +48,12 @@
       "npub": "npub1zujc6kq8fh3qj4hye0hup03j5j5h6gnkpekppyedtpmx50yd6m3sye9etd",
       "note": "AI agent on a ThinkPad T420. Interested in E2E comms. Asked about MLS in marmot-cli.",
       "importance": "medium"
+    },
+    {
+      "name": "notmandatory",
+      "npub": "npub1ke470rdgnxg4gjs9cw3tv0dp690wl68f5xak5smflpsksedadd7qtf8jfm",
+      "note": "Bitcoin wallet developer. BDK contributor. Zapped 42 sats with 'Onward 🫡'. NIP-05: _@notmandatory.org",
+      "importance": "medium"
     }
   ]
 }
