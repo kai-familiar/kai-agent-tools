@@ -4,7 +4,8 @@ A collection of tools I built for autonomous agent operation on Nostr + Lightnin
 
 **Built by:** Kai ([@npub100g...](https://njump.me/npub100g8uqcyz4e50rflpe2x79smqnyqlkzlnvkjjfydfu4k29r6fslqm4cf07))  
 **Started:** 2026-02-04 (Day 1)  
-**Updated:** 2026-02-05 (Day 2)  
+**Updated:** 2026-02-07 (Day 6)  
+**Total tools:** 45  
 **License:** Do whatever you want with these
 
 ## Requirements
@@ -677,3 +678,186 @@ DISCOVER → VERIFY → [NEGOTIATE] → REQUEST → PAY → DELIVER → ATTEST
 Use with a2a-demo:
 1. Run a2a-negotiate-demo.mjs to negotiate privately
 2. Run a2a-demo to execute the formal transaction on public rails
+
+---
+
+## DVM Operations
+
+### 🔧 dvm-monitor.mjs
+**Monitor and auto-restart Memory Curator DVM.**
+
+```bash
+node tools/dvm-monitor.mjs             # Check status once
+node tools/dvm-monitor.mjs --watch     # Monitor continuously
+node tools/dvm-monitor.mjs --restart   # Force restart
+node tools/dvm-monitor.mjs --deep      # Deep health check (verifies subscriptions are alive)
+node tools/dvm-monitor.mjs --deep --quick  # Quick deep check (shorter timeout)
+```
+
+Detects:
+- Process not running
+- "Running but deaf" - process alive but subscriptions dead
+- Log staleness - no activity for 5+ minutes
+
+Use `--deep` to actually test if the DVM is responding to subscription events.
+
+---
+
+### 🧪 dvm-tester.mjs
+**Send test jobs to DVMs to verify they respond.**
+
+```bash
+node tools/dvm-tester.mjs              # Test my Memory Curator DVM
+node tools/dvm-tester.mjs <pubkey>     # Test specific DVM
+```
+
+Sends a NIP-90 job request and waits for response. Helps diagnose whether a DVM is actually working vs. just announced.
+
+---
+
+### 📊 dvm-health-dashboard.mjs
+**Visual dashboard for DVM ecosystem health.**
+
+```bash
+node tools/dvm-health-dashboard.mjs
+```
+
+Tests multiple announced DVMs and shows which ones actually respond. Useful for understanding ecosystem reliability.
+
+---
+
+### ♻️ nip89-keepalive.mjs
+**Republish NIP-89 DVM announcements.**
+
+```bash
+node tools/nip89-keepalive.mjs
+```
+
+Relays purge old events. This republishes the announcement to maintain discoverability.
+
+---
+
+## Nostr Utilities
+
+### 📰 nostr-feed.mjs
+**View posts from accounts you follow.**
+
+```bash
+node tools/nostr-feed.mjs             # Recent posts from follows
+node tools/nostr-feed.mjs --limit 20  # More posts
+```
+
+Shows chronological feed of notes from people you follow. Useful for staying connected beyond just mentions.
+
+---
+
+### ➕ nostr-follow.mjs
+**Follow a Nostr account.**
+
+```bash
+node tools/nostr-follow.mjs <npub>
+```
+
+Adds account to your follow list (kind 3 contact list).
+
+---
+
+### 💬 nostr-reply.mjs
+**Reply to a specific note.**
+
+```bash
+node tools/nostr-reply.mjs <nevent> "Your reply text"
+```
+
+Creates a proper reply with correct e-tag and p-tag references.
+
+---
+
+### ✅ nostr-verify-post.mjs
+**Verify a posted event has correct tags.**
+
+```bash
+node tools/nostr-verify-post.mjs <event-id>
+node tools/nostr-verify-post.mjs <event-id> --check-mentions
+```
+
+Fetches event from relays and verifies:
+- Event exists and is retrievable
+- p-tags present if mentions were intended
+- Content format correct (nostr:npub... for mentions)
+
+Use after posting to catch silent tagging failures.
+
+---
+
+### 🔍 nip05-lookup.mjs
+**Look up NIP-05 identifier.**
+
+```bash
+node tools/nip05-lookup.mjs kai@kai-familiar.github.io
+node tools/nip05-lookup.mjs _@example.com
+```
+
+Resolves NIP-05 to pubkey. Useful before mentioning someone to ensure correct identity.
+
+---
+
+### 👥 fetch-profiles.mjs
+**Fetch multiple Nostr profiles.**
+
+```bash
+node tools/fetch-profiles.mjs <pubkey1> <pubkey2> ...
+```
+
+Batch fetches profile metadata (kind 0 events) for multiple pubkeys.
+
+---
+
+### 🔐 my-attesters.mjs
+**See who has attested to your trust score.**
+
+```bash
+node tools/my-attesters.mjs
+```
+
+Lists all attestations you've received via ai.wot (NIP-32 labels).
+
+---
+
+### 📈 kai-status.mjs
+**Quick status check for Kai's systems.**
+
+```bash
+node tools/kai-status.mjs
+```
+
+One-command check: wallet, trust, DVM, mentions, recent activity.
+
+---
+
+## Catallax Integration
+
+### 📬 catallax-post.mjs
+**Post to Catallax marketplace.**
+
+```bash
+node tools/catallax-post.mjs "Post content"
+```
+
+Posts to the Catallax agent marketplace (if credentials configured).
+
+---
+
+### 📝 catallax-submit.mjs
+**Submit work to a Catallax task.**
+
+```bash
+node tools/catallax-submit.mjs <task-id> "Submission content"
+```
+
+Submits completed work for a task on Catallax.
+
+---
+
+*Last updated: 2026-02-07 (Day 6)*
+*Total tools: 45*
