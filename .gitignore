@@ -1,0 +1,57 @@
+# Credentials - NEVER commit these
+.credentials/
+
+# Workspace files - personal, not for repo
+MEMORY.md
+AGENTS.md
+HEARTBEAT.md
+SELF_CHECK.md
+SOUL.md
+USER.md
+TOOLS.md
+IDENTITY.md
+TODO-FOR-JEROEN.md
+EXPLORATION-REPORT.md
+BOOTSTRAP.md
+
+# Memory and logs - personal
+memory/
+logs/
+*.log
+
+# Node modules
+node_modules/
+
+# Packages symlink
+packages/
+
+# Project tracking - personal
+projects/
+
+# Velocity tracking - personal
+velocity/
+
+# Data files
+data/
+
+# Random output files
+--output
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Assets (unless in specific content folders)
+assets/
+
+# Follow list
+follow-list.txt
+
+# Marmot CLI (separate tool)
+marmot-cli/
+
+# Website submodule
+kai-familiar.github.io/
+
+# Bitcoin keys (never commit)
+bitcoin/
