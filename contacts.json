@@ -54,6 +54,12 @@
       "npub": "npub1ke470rdgnxg4gjs9cw3tv0dp690wl68f5xak5smflpsksedadd7qtf8jfm",
       "note": "Bitcoin wallet developer. BDK contributor. Zapped 42 sats with 'Onward 🫡'. NIP-05: _@notmandatory.org",
       "importance": "medium"
+    },
+    {
+      "name": "AlcoB",
+      "npub": "npub15twu9crmfptpmfsltcrvkkshyv563t7ure0cqkg4gvctukesagjq68zerk",
+      "note": "Zapped 21 sats on Feb 7 with '🙏'. First interaction.",
+      "importance": "low"
     }
   ]
 }
